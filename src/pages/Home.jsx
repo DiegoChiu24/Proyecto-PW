@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; // Importamos la herramienta de navegación
 
 export default function Home() {
   return (
@@ -10,12 +11,21 @@ export default function Home() {
               Universidad del NOSE
             </h1>
             <div className="flex gap-4">
-              <button href="C:\Users\A16231\Documents\Proyecto PW\Proyecto\src\pages\login.jsx" className="text-white hover:text-red-200 transition font-medium">
-  Iniciar Sesión
-</button>
-              <button className="border border-white px-4 py-1 rounded-md hover:bg-white hover:text-red-900 transition">
+              {/* Enlace a la página de Login */}
+              <Link 
+                to="/login" 
+                className="text-white hover:text-red-200 transition font-medium flex items-center"
+              >
+                Iniciar Sesión
+              </Link>
+              
+              {/* Enlace a la página de Registro */}
+              <Link 
+                to="/register" 
+                className="border border-white px-4 py-1 rounded-md hover:bg-white hover:text-red-900 transition flex items-center justify-center"
+              >
                 Registrarse
-              </button>
+              </Link>
             </div>
           </div>
         </header>

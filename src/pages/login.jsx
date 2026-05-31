@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Login() {
   return (
@@ -10,7 +11,7 @@ export default function Login() {
             Sistema de inicio de sesión
           </p>
         </div>
-        <form className="p-8 space-y-6">
+        <form className="p-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
           <div className="text-center mb-2">
             <h3 className="text-xl font-bold text-slate-800">Iniciar Sesión</h3>
             <p className="text-slate-400 text-xs mt-1">Ingresa tu informacion</p>
@@ -44,9 +45,9 @@ export default function Login() {
           </div>
           <div className="text-center pt-4 border-t border-slate-100 flex justify-between items-center text-xs">
             <span className="text-slate-400">¿No tienes cuenta?</span>
-            <a href="/todavia no hay" className="bg-[#1a2e40] hover:bg-[#111f2c] text-white px-3 py-1.5 rounded-lg font-medium shadow-sm transition-colors">
+            <Link to="/register" className="bg-[#1a2e40] hover:bg-[#111f2c] text-white px-3 py-1.5 rounded-lg font-medium shadow-sm transition-colors">
               Registrate
-            </a>
+            </Link>
           </div>
         </form>
       </div>
