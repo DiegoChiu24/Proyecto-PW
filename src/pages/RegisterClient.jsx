@@ -1,11 +1,14 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function RegisterClient() {
+  const navigate = useNavigate();
+  const [nombres, setNombres] = useState('');
+
   const handleSubmit = (e) => {
-    e.preventDefault();
-    // Aquí iría la lógica para procesar el registro del cliente
-  };
+  e.preventDefault();
+  navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Cliente' } }); // <- Agregamos rol
+};
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -30,6 +33,8 @@ export default function RegisterClient() {
               <input 
                 type="text" 
                 placeholder="Juan" 
+                value={nombres}
+                onChange={(e) => setNombres(e.target.value)}
                 required 
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
               />
