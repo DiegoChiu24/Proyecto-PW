@@ -1,28 +1,33 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home.jsx';
-import Login from './pages/login.jsx';       // 'l' minúscula según tus archivos
-import Register from './pages/Register.jsx'; // 'R' mayúscula según tus archivos
+import Login from './pages/login.jsx';
+import Register from './pages/Register.jsx'; 
 import RegisterAdmin from './pages/RegisterAdmin.jsx';
 import RegisterClient from './pages/RegisterClient.jsx';
+import MisReservas from './pages/MisReservas.jsx';
+import Reservar from './pages/reservar.jsx'; 
+import PerfilCliente from './pages/perfilCliente.jsx';
+import PerfilAdmin from './pages/perfilAdmin.jsx';
+import AdminHorarios from './pages/AdminHorarios.jsx';
+import AdminBloqueos from './pages/AdminBloqueos.jsx';
+import AdminReporte from './pages/AdminReporte.jsx';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Ruta para la página principal */}
         <Route path="/" element={<Home />} />
-        
-        {/* Ruta para el Inicio de Sesión */}
         <Route path="/login" element={<Login />} />
-        
-        {/* Ruta para el Registro (Selección de Rol) */}
         <Route path="/register" element={<Register />} />
-
-        {/* Ruta para el Registro de Administrador */}
         <Route path="/register/admin" element={<RegisterAdmin />} />
-
-        {/* Ruta para el Registro de Cliente */}
         <Route path="/register/client" element={<RegisterClient />} />
+        <Route path="/misreservas" element={<MisReservas />} />
+        <Route path="/reservar" element={<Reservar />} />
+        <Route path="/perfil" element={<PerfilCliente />} />
+        <Route path="/perfil/admin" element={<PerfilAdmin />} />
+        <Route path="/admin/horarios" element={<AdminHorarios />} />
+        <Route path="/admin/bloqueos" element={<AdminBloqueos />} />
+        <Route path="/admin/reporte" element={<AdminReporte />} />
       </Routes>
     </Router>
   );

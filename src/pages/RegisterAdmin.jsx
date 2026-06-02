@@ -1,11 +1,14 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; // 1. Agregamos useNavigate
 
 export default function RegisterAdmin() {
+  const navigate = useNavigate(); // 2. Inicializamos el navegador de rutas
+  const [nombres, setNombres] = useState(''); // 3. Creamos el estado para capturar el nombre
+
   const handleSubmit = (e) => {
-    e.preventDefault();
-    // Aquí iría la lógica para procesar el registro del administrador
-  };
+  e.preventDefault();
+  navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Admin' } }); // <- Agregamos rol
+};
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -30,6 +33,8 @@ export default function RegisterAdmin() {
               <input 
                 type="text" 
                 placeholder="Carlos" 
+                value={nombres} // 5. Vinculamos el input al estado
+                onChange={(e) => setNombres(e.target.value)}
                 required 
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
               />
@@ -98,7 +103,7 @@ export default function RegisterAdmin() {
           <div className="pt-2">
             <button 
               type="submit" 
-              className="w-full bg-[#bd0909] hover:bg-[#990707] text-white font-semibold py-2.5 px-5 rounded-lg shadow-md transition-all text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#bd0909]"
+              className="w-full bg-[#bd0909] hover:bg-[#990707] text-white font-semibold py-2.5 px-5 rounded-lg shadow-md transition-all text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#bd0909] cursor-pointer"
             >
               Registrar Administrador
             </button>
