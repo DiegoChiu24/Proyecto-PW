@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-// Bloques por defecto (coinciden con los del formulario de reserva)
 const BLOQUES_INICIALES = [
   { id: 1, hora: '12:00', etiqueta: '12:00 PM', capacidad: 30, activo: true },
   { id: 2, hora: '12:30', etiqueta: '12:30 PM', capacidad: 30, activo: true },
@@ -23,7 +22,6 @@ export default function AdminHorarios() {
   const [hora, setHora] = useState('');
   const [capacidad, setCapacidad] = useState('30');
 
-  // Guard de sesión de administrador
   useEffect(() => {
     const sessionActive = localStorage.getItem('isLoggedIn') === 'true';
     if (!sessionActive) {
@@ -31,7 +29,6 @@ export default function AdminHorarios() {
     }
   }, [navigate]);
 
-  // Persistir cada cambio
   const persistir = (lista) => {
     setBloques(lista);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
@@ -91,7 +88,6 @@ export default function AdminHorarios() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* HEADER */}
       <div className="bg-red-900 text-white">
         <header className="w-full border-b border-red-700">
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -154,7 +150,6 @@ export default function AdminHorarios() {
           </button>
         </form>
 
-        {/* TABLA DE BLOQUES */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead>

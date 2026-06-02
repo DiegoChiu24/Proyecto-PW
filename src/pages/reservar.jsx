@@ -43,14 +43,12 @@ export default function reservar() {
       return;
     }
 
-    // Buscamos el objeto del plato para mandar sus datos completos a Mis Reservas
     const datosPlato = PLATOS_SELECCIONABLES.find(p => String(p.id) === platoSeleccionado);
 
-    // Mandamos los datos de la reserva con un ID de transacción único para evitar duplicados
     navigate('/misreservas', {
       state: {
         reservaCompletada: true,
-        idTransaccion: `tx-${Date.now()}`, // <--- Identificador único temporal
+        idTransaccion: `tx-${Date.now()}`,
         nombrePlato: datosPlato?.nombre,
         precioPlato: datosPlato?.precio,
         fecha: fecha,
@@ -84,16 +82,16 @@ export default function reservar() {
       <section className="flex-1 max-w-4xl w-full mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
           <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 border-b border-gray-100 pb-2">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 border-b border-gray-100 pb-2 reserva-title">
               1. Selecciona tu Almuerzo
             </h3>
             <div className="space-y-3">
               {PLATOS_SELECCIONABLES.map((plato) => (
                 <label 
                   key={plato.id}
-                  className={`border flex items-center justify-between p-4 rounded-xl cursor-pointer transition shadow-sm ${
+                  className={`reserva-plato-card border flex items-center justify-between p-4 rounded-xl cursor-pointer transition shadow-sm ${
                     platoSeleccionado === String(plato.id)
-                      ? 'border-red-800 bg-red-50/50 ring-1 ring-red-800'
+                      ? 'reserva-plato-card-selected border-red-800 bg-red-50/50 ring-1 ring-red-800'
                       : 'border-gray-200 bg-white hover:border-gray-300'
                   }`}
                 >
@@ -107,13 +105,13 @@ export default function reservar() {
                       className="accent-red-800 w-4 h-4"
                     />
                     <div>
-                      <span className="font-medium text-gray-900 block">{plato.nombre}</span>
-                      <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider">
+                      <span className="font-medium text-gray-900 reserva-plato-nombre block">{plato.nombre}</span>
+                      <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider reserva-plato-tipo">
                         {plato.tipo}
                       </span>
                     </div>
                   </div>
-                  <span className="text-lg font-bold text-red-800">{plato.precio}</span>
+                  <span className="text-lg font-bold text-red-800 reserva-plato-precio">{plato.precio}</span>
                 </label>
               ))}
             </div>

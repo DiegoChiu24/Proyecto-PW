@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const STORAGE_KEY = 'mis_reservas_comedor';
 
-// Convierte "S/ 20.00" -> 20.00
 const parsePrecio = (precio) => {
   if (!precio) return 0;
   const limpio = String(precio).replace(/[^0-9.]/g, '');
@@ -13,7 +12,6 @@ const parsePrecio = (precio) => {
 export default function AdminReporte() {
   const navigate = useNavigate();
 
-  // Fecha de hoy en formato dd/mm/aaaa (igual al guardado en las reservas)
   const hoy = new Date();
   const fechaHoyIso = hoy.toISOString().split('T')[0];
 
@@ -33,7 +31,6 @@ export default function AdminReporte() {
 
   const fechaFiltroFormato = fechaFiltro.split('-').reverse().join('/');
 
-  // Reservas activas (no canceladas) de la fecha seleccionada
   const reservasDelDia = useMemo(
     () =>
       reservas.filter(
@@ -42,7 +39,6 @@ export default function AdminReporte() {
     [reservas, fechaFiltroFormato]
   );
 
-  // Agregado por plato
   const resumen = useMemo(() => {
     const mapa = new Map();
     reservasDelDia.forEach((r) => {
@@ -83,7 +79,6 @@ export default function AdminReporte() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* HEADER */}
       <div className="bg-red-900 text-white">
         <header className="w-full border-b border-red-700">
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">

@@ -86,7 +86,6 @@ export default function AdminBloqueos() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* HEADER */}
       <div className="bg-red-900 text-white">
         <header className="w-full border-b border-red-700">
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -113,7 +112,6 @@ export default function AdminBloqueos() {
           </p>
         </div>
 
-        {/* SUSPENSIÓN GLOBAL DE SERVICIO */}
         <div
           className={`rounded-2xl p-6 shadow-sm border flex items-center justify-between gap-6 ${
             data.servicioSuspendido ? 'bg-red-50 border-red-300' : 'bg-white border-slate-200'
@@ -140,7 +138,7 @@ export default function AdminBloqueos() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* FECHAS BLOQUEADAS */}
+
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">
               Fechas Inhabilitadas
@@ -197,7 +195,6 @@ export default function AdminBloqueos() {
             </ul>
           </div>
 
-          {/* USUARIOS BLOQUEADOS */}
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">
               Usuarios Bloqueados

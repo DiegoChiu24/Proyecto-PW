@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // 1. Agregamos useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function RegisterAdmin() {
-  const navigate = useNavigate(); // 2. Inicializamos el navegador de rutas
-  const [nombres, setNombres] = useState(''); // 3. Creamos el estado para capturar el nombre
+  const navigate = useNavigate();
+  const [nombres, setNombres] = useState('');
 
   const handleSubmit = (e) => {
   e.preventDefault();
-  navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Admin' } }); // <- Agregamos rol
+  navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Admin' } });
 };
 
   return (
@@ -33,7 +33,7 @@ export default function RegisterAdmin() {
               <input 
                 type="text" 
                 placeholder="Carlos" 
-                value={nombres} // 5. Vinculamos el input al estado
+                value={nombres}
                 onChange={(e) => setNombres(e.target.value)}
                 required 
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"

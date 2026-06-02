@@ -7,7 +7,7 @@ export default function RegisterClient() {
 
   const handleSubmit = (e) => {
   e.preventDefault();
-  navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Cliente' } }); // <- Agregamos rol
+    navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Cliente' } });
 };
 
   return (

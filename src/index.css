@@ -1,1 +1,190 @@
 @import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+html.dark .bg-white {
+  background-color: #0f172a !important;
+}
+
+html.dark .bg-gray-50,
+html.dark .bg-slate-50 {
+  background-color: #111827 !important;
+}
+
+html.dark .bg-gray-100,
+html.dark .bg-slate-100 {
+  background-color: #1f2937 !important;
+}
+
+html.dark .bg-gray-200 {
+  background-color: #334155 !important;
+}
+
+html.dark .bg-red-50 {
+  background-color: #3f1f1f !important;
+}
+
+html.dark .text-gray-800,
+html.dark .text-slate-800 {
+  color: #e2e8f0 !important;
+}
+
+html.dark .reserva-title {
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
+html.dark .reserva-plato-card {
+  background-color: #0f172a !important;
+  border-color: #475569 !important;
+}
+
+html.dark .reserva-plato-card-selected {
+  background-color: rgba(248, 113, 113, 0.16) !important;
+  border-color: #fb7185 !important;
+}
+
+html.dark .reserva-plato-nombre {
+  color: #f8fafc !important;
+}
+
+html.dark .reserva-plato-tipo {
+  color: #94a3b8 !important;
+}
+
+html.dark .reserva-plato-precio {
+  color: #fecdd3 !important;
+}
+
+html.dark .text-gray-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-gray-500,
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-gray-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark .border-gray-200,
+html.dark .border-slate-200,
+html.dark .border-gray-100,
+html.dark .border-red-200 {
+  border-color: #334155 !important;
+}
+
+html.dark .text-red-50 {
+  color: #fca5a5 !important;
+}
+
+html.dark .text-red-100 {
+  color: #fecaca !important;
+}
+
+html.dark .text-red-200 {
+  color: #fecaca !important;
+}
+
+html.dark .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+html.dark .text-red-800 {
+  color: #f87171 !important;
+}
+
+html.dark .text-red-900 {
+  color: #fda29b !important;
+}
+
+html.dark .border-red-700 {
+  border-color: #fca5a5 !important;
+}
+
+html.dark .border-red-200 {
+  border-color: #fca5a5 !important;
+}
+
+html.dark .bg-red-50 {
+  background-color: #7f1d1d !important;
+}
+
+html.dark .bg-red-700 {
+  background-color: #7f1d1d !important;
+}
+
+html.dark .bg-red-800 {
+  background-color: #7f1d1d !important;
+}
+
+html.dark .misreservas-title {
+  color: #fecaca !important;
+}
+
+html.dark .misreservas-subtitle,
+html.dark .misreservas-meta,
+html.dark .misreservas-total-label,
+html.dark .misreservas-codigo,
+html.dark .misreservas-empty-text {
+  color: #94a3b8 !important;
+}
+
+html.dark .misreservas-plato {
+  color: #f8fafc !important;
+}
+
+html.dark .misreservas-price {
+  color: #fecdd3 !important;
+}
+
+html.dark .misreservas-back-link {
+  border-color: #fca5a5 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .misreservas-ticket-btn {
+  background-color: #b91c1c !important;
+}
+
+html.dark .misreservas-cancel-btn {
+  color: #cbd5e1 !important;
+}
+
+html.dark .misreservas-empty-link {
+  background-color: #7f1d1d !important;
+}
+
+html.dark .misreservas-status-success {
+  background-color: #03341f !important;
+  color: #bbf7d0 !important;
+  border-color: #065f46 !important;
+}
+
+html.dark .misreservas-status-warning {
+  background-color: #4c3f0b !important;
+  color: #fef08a !important;
+  border-color: #a16207 !important;
+}
+
+html.dark .misreservas-status-danger {
+  background-color: #581c1c !important;
+  color: #fecaca !important;
+  border-color: #991b1b !important;
+}

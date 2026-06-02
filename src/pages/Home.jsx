@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 const platosDeCarta = [
   { id: 1, nombre: 'Lomo Saltado', precio: 'S/ 20.00', desc: 'Trozos de carne salteados con cebolla, tomate, papas fritas y arroz.' },
   { id: 2, nombre: 'Ají de Gallina', precio: 'S/ 15.00', desc: 'Pollo deshilachado en cremosa salsa de ají amarillo acompañado de arroz.' },
-  { id: 3, nombre: 'Tallarines Verdes', precio: 'S/ 16.00', desc: 'Pasta en salsa de albahaca servida con bistec a la plancha.' },
+  { id: 3, nombre: 'Tallarines Verdes', precio: 'S/ 16.00', desc: 'Pasta en salsa de albahaca servida con bisteck a la plancha.' },
   { id: 4, nombre: 'Arroz Chaufa', precio: 'S/ 15.00', desc: 'Arroz salteado al estilo oriental con pollo, huevo y cebollita china.' },
   { id: 5, nombre: 'Pollo a la Brasa', precio: 'S/ 18.00', desc: 'Cuarto de pollo acompañado de papas fritas y ensalada fresca.' },
   { id: 6, nombre: 'Seco de Res', precio: 'S/ 19.00', desc: 'Carne cocida en salsa de culantro acompañada de arroz y frejoles.' },
@@ -17,7 +17,7 @@ const platosDeCarta = [
   { id: 13, nombre: 'Estofado de Pollo', precio: 'S/ 17.00', desc: 'Pollo cocido en salsa de tomate con zanahoria, arvejas y arroz.' },
   { id: 14, fontName: 'Chicharrón de Cerdo', nombre: 'Chicharrón de Cerdo', precio: 'S/ 20.00', desc: 'Trozos de cerdo fritos servidos con camote y salsa criolla.' },
   { id: 15, nombre: 'Tallarines Rojos', precio: 'S/ 15.00', desc: 'Pasta con salsa de tomate casera acompañada de pollo a la plancha.' },
-  { id: 16, fontName: 'Bistec a lo Pobre', nombre: 'Bistec a lo Pobre', precio: 'S/ 19.00', desc: 'Bistec acompañado de huevo frito, plátano maduro y arroz.' },
+  { id: 16, fontName: 'Bistec a lo Pobre', nombre: 'Bisteck a lo Pobre', precio: 'S/ 19.00', desc: 'Bisteck acompañado de huevo frito, plátano frito y arroz.' },
 ];
 
 export default function Home() {
@@ -36,6 +36,22 @@ export default function Home() {
   const [rolUsuario, setRolUsuario] = useState(() => {
     return location.state?.rol || localStorage.getItem('rolUsuario') || 'Alumno';
   });
+
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('theme') === 'dark';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     if (location.state?.isLoggedIn) {
@@ -60,20 +76,29 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <div className="bg-red-900 text-white">
-        <header className="w-full border-b border-red-700">
+      <div className="text-white">
+        <header className="w-full border-b border-red-700 bg-red-900">
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-semibold tracking-wide flex items-center gap-3">
               <img 
                 src="/imagenes/LogoNose.jpg" 
                 alt="Logo Universidad del NOSE" 
-                className="w-16 h-16 object-contain" // Cambia w-8 a w-16 y h-8 a h-16
-                onError={(e) => { e.target.style.display = 'none'; }} // Evita que se rompa el diseño si aún no pones el archivo
+                className="w-16 h-16 object-contain"
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
               <span>Universidad del NOSE</span>
               </h1>
             
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setDarkMode((current) => !current)}
+                aria-label="Alternar modo oscuro"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+              >
+                {darkMode ? '☀' : '🌙'}
+              </button>
+
               {isLoggedIn ? (
                 <div className="relative">
                   <button 
@@ -107,7 +132,7 @@ export default function Home() {
                 </div>
               ) : (
                 <>
-                  <Link to="/login" className="text-white hover:text-red-200 transition font-medium flex items-center">
+                  <Link to="/login" className="text-white hover:text-red-200 transition font-medium flex items-center gap-2">
                     Iniciar Sesión
                   </Link>
                   <Link to="/register" className="border border-white px-4 py-1 rounded-md hover:bg-white hover:text-red-900 transition flex items-center justify-center">
@@ -119,11 +144,15 @@ export default function Home() {
           </div>
         </header>
 
-        <main className="flex flex-col items-center px-6 py-20">
-          <section className="text-center max-w-3xl">
+        <main
+          className="relative flex flex-col items-center px-6 py-20 bg-cover bg-center"
+          style={{ backgroundImage: 'url("/imagenes/fondo.jpg")' }}
+        >
+          <div className="absolute inset-0 bg-slate-950/50"></div>
+          <section className="relative text-center max-w-3xl text-white">
             <h2 className="text-5xl font-bold">Sistema de Reservas</h2>
-            <p className="mt-6 text-lg text-red-100 leading-relaxed">
-              Página de proyecto de PW, que trata de un sistema de reservas (descripción en progreso)
+            <p className="mt-6 text-lg leading-relaxed">
+              Plataforma web para la gestión de reservas de la Universidad del NOSE. Facilita a los estudiantes reservar su almuerzo, consultar el menú del día y gestionar sus reservas de manera eficiente, todo desde la comodidad de su dispositivo móvil o computadora.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
               <Link 
@@ -180,7 +209,7 @@ export default function Home() {
               </div>
               <div className="p-5">
                 <h4 className="text-xl font-semibold text-gray-800">Tallarines Verdes</h4>
-                <p className="mt-2 text-gray-600 text-sm leading-relaxed">Pasta en salsa de albahaca con bistec a la parrilla.</p>
+                <p className="mt-2 text-gray-600 text-sm leading-relaxed">Pasta en salsa de albahaca con bisteck a la parrilla.</p>
               </div>
             </div>
           </div> 

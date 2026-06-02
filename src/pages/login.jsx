@@ -4,32 +4,25 @@ import { Link, useNavigate } from 'react-router-dom';
 export default function Login() {
   const navigate = useNavigate();
   
-  // Estados para capturar las credenciales
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
-  const [tipoUsuario, setTipoUsuario] = useState('client'); // 'client' o 'admin'
+  const [tipoUsuario, setTipoUsuario] = useState('client');
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Validación simple en desarrollo: si están vacíos no avanza
     if (!correo || !password) {
       alert("Por favor, completa todos los campos.");
       return;
     }
 
-    // 1. Extraer un nombre simulado basado en el correo electrónico
     const nombreSimulado = correo.split('@')[0];
 
-    // 2. Traducir el rol para que coincida con lo que esperan tus componentes Perfil
     const rolFormateado = tipoUsuario === 'admin' ? 'Admin' : 'Alumno';
-
-    // 3. Guardar la sesión en localStorage para que persista al recargar
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('nombreUsuario', nombreSimulado);
     localStorage.setItem('rolUsuario', rolFormateado);
 
-    // 4. Redirigir según el tipo de usuario seleccionado
     if (tipoUsuario === 'admin') {
       navigate('/perfil/admin', { 
         state: { isLoggedIn: true, nombreUsuario: nombreSimulado, rol: 'Admin' } 
