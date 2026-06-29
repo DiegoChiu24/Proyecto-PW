@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Header from '../components/Header.jsx';
 
 export default function PerfilAdmin() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [menuAbierto, setMenuAbierto] = useState(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+  const [isLoggedIn] = useState(() => {
     return location.state?.isLoggedIn || localStorage.getItem('isLoggedIn') === 'true';
   });
 
-  const [nombreUsuario, setNombreUsuario] = useState(() => {
+  const [nombreUsuario] = useState(() => {
     return location.state?.nombreUsuario || localStorage.getItem('nombreUsuario') || 'Usuario';
   });
 
-  const [rolUsuario, setRolUsuario] = useState(() => {
+  const [rolUsuario] = useState(() => {
     return location.state?.rol || localStorage.getItem('rolUsuario') || 'Admin';
   });
 
@@ -24,71 +24,9 @@ export default function PerfilAdmin() {
     }
   }, [isLoggedIn, navigate]);
 
-  const handleCerrarSesion = () => {
-    setMenuAbierto(false);
-    localStorage.clear();
-    setIsLoggedIn(false);
-    setNombreUsuario('Usuario');
-    setRolUsuario('Alumno');
-    navigate('/', { state: {} });
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* HEADER INTEGRADO */}
-      <div className="bg-red-900 text-white">
-        <header className="w-full border-b border-red-700">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-semibold tracking-wide">
-              Universidad del NOSE
-            </h1>
-            
-            <div className="flex gap-4">
-              {isLoggedIn ? (
-                <div className="relative">
-                  <button 
-                    onClick={() => setMenuAbierto(!menuAbierto)}
-                    className="flex items-center gap-3 bg-red-800 border border-red-700 px-4 py-1.5 rounded-md hover:bg-red-750 transition outline-none cursor-pointer select-none"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                    <span className="text-sm font-medium tracking-wide">
-                      {nombreUsuario} ({rolUsuario}) ▼
-                    </span>
-                  </button>
-
-                  {menuAbierto && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl py-1 z-50">
-                      <Link 
-                        to="/" 
-                        onClick={() => setMenuAbierto(false)}
-                        className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 font-medium transition-colors"
-                      >
-                        Ir al Home
-                      </Link>
-                      <hr className="border-gray-150 my-1" />
-                      <button 
-                        onClick={handleCerrarSesion}
-                        className="block w-full text-left px-4 py-2.5 text-sm text-red-700 hover:bg-red-50 font-semibold transition-colors cursor-pointer"
-                      >
-                        Cerrar Sesión
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <Link to="/login" className="text-white hover:text-red-200 transition font-medium flex items-center">
-                    Iniciar Sesión
-                  </Link>
-                  <Link to="/register" className="border border-white px-4 py-1 rounded-md hover:bg-white hover:text-red-900 transition flex items-center justify-center">
-                    Registrarse
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </header>
-      </div>
+      <Header variant="red" />
 
       {/* CUERPO PRINCIPAL */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-12 space-y-12">
@@ -148,7 +86,7 @@ export default function PerfilAdmin() {
 
                 <Link
                   to="/"
-                  className="block w-full border border-slate-200 text-slate-600 hover:bg-slate-50 text-center font-medium py-2.5 px-4 rounded-xl transition-all text-sm"
+                  className="block w-full border border-slate-200 text-slate-650 hover:bg-slate-50 text-center font-medium py-2.5 px-4 rounded-xl transition-all text-sm"
                 >
                   Volver a la Carta
                 </Link>

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Header from '../components/Header.jsx';
+import DishCard from '../components/DishCard.jsx';
 
 const platosDeCarta = [
   { id: 1, nombre: 'Lomo Saltado', precio: 'S/ 20.00', desc: 'Trozos de carne salteados con cebolla, tomate, papas fritas y arroz.' },
@@ -21,104 +23,13 @@ const platosDeCarta = [
 ];
 
 export default function Home() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [menuAbierto, setMenuAbierto] = useState(false);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return location.state?.isLoggedIn || localStorage.getItem('isLoggedIn') === 'true';
-  });
-
-  const [nombreUsuario, setNombreUsuario] = useState(() => {
-    return location.state?.nombreUsuario || localStorage.getItem('nombreUsuario') || 'Usuario';
-  });
-
-  const [rolUsuario, setRolUsuario] = useState(() => {
-    return location.state?.rol || localStorage.getItem('rolUsuario') || 'Alumno';
-  });
-
-  useEffect(() => {
-    if (location.state?.isLoggedIn) {
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('nombreUsuario', location.state.nombreUsuario);
-      localStorage.setItem('rolUsuario', location.state.rol || 'Alumno');
-      
-      setIsLoggedIn(true);
-      setNombreUsuario(location.state.nombreUsuario);
-      setRolUsuario(location.state.rol || 'Alumno');
-    }
-  }, [location.state]);
-
-  const handleCerrarSesion = () => {
-    setMenuAbierto(false);
-    localStorage.clear(); 
-    setIsLoggedIn(false);
-    setNombreUsuario('Usuario');
-    setRolUsuario('Alumno'); 
-    navigate('/', { state: {} });
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <Header variant="red" />
+
       <div className="bg-red-900 text-white">
-        <header className="w-full border-b border-red-700">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-semibold tracking-wide flex items-center gap-3">
-              <img 
-                src="/imagenes/LogoNose.jpg" 
-                alt="Logo Universidad del NOSE" 
-                className="w-16 h-16 object-contain" // Cambia w-8 a w-16 y h-8 a h-16
-                onError={(e) => { e.target.style.display = 'none'; }} // Evita que se rompa el diseño si aún no pones el archivo
-              />
-              <span>Universidad del NOSE</span>
-              </h1>
-            
-            <div className="flex gap-4">
-              {isLoggedIn ? (
-                <div className="relative">
-                  <button 
-                    onClick={() => setMenuAbierto(!menuAbierto)}
-                    className="flex items-center gap-3 bg-red-800 border border-red-700 px-4 py-1.5 rounded-md hover:bg-red-750 transition outline-none cursor-pointer select-none"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                    <span className="text-sm font-medium tracking-wide">
-                      {nombreUsuario} ({rolUsuario}) ▼
-                    </span>
-                  </button>
-
-                  {menuAbierto && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-100">
-                      <Link 
-                        to={rolUsuario === 'Admin' ? '/perfil/admin' : '/perfil'} 
-                        onClick={() => setMenuAbierto(false)}
-                        className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 font-medium transition-colors"
-                      >
-                        Mi Perfil
-                      </Link>
-                      <hr className="border-gray-150 my-1" />
-                      <button 
-                        onClick={handleCerrarSesion}
-                        className="block w-full text-left px-4 py-2.5 text-sm text-red-700 hover:bg-red-50 font-semibold transition-colors cursor-pointer"
-                      >
-                        Cerrar Sesión
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <Link to="/login" className="text-white hover:text-red-200 transition font-medium flex items-center">
-                    Iniciar Sesión
-                  </Link>
-                  <Link to="/register" className="border border-white px-4 py-1 rounded-md hover:bg-white hover:text-red-900 transition flex items-center justify-center">
-                    Registrarse
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
-        </header>
-
         <main className="flex flex-col items-center px-6 py-20">
           <section className="text-center max-w-3xl">
             <h2 className="text-5xl font-bold">Sistema de Reservas</h2>
@@ -154,35 +65,24 @@ export default function Home() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition">
-              <div className="h-64 bg-gray-100 overflow-hidden">
-                <img src="/imagenes/lomo-saltado.jpg" alt="Lomo Saltado" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-5">
-                <h4 className="text-xl font-semibold text-gray-800">Lomo Saltado</h4>
-                <p className="mt-2 text-gray-600 text-sm leading-relaxed">Clásico plato peruano acompañado de papas fritas y arroz.</p>
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition">
-              <div className="h-64 bg-gray-100 overflow-hidden">
-                <img src="/imagenes/aji-gallina.jpg" alt="Ají de Gallina" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-5">
-                <h4 className="text-xl font-semibold text-gray-800">Ají de Gallina</h4>
-                <p className="mt-2 text-gray-600 text-sm leading-relaxed">Pollo deshilachado en crema de ají amarillo y queso.</p>
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition">
-              <div className="h-64 bg-gray-100 overflow-hidden">
-                <img src="/imagenes/tallarines-verdes.jpg" alt="Tallarines Verdes" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-5">
-                <h4 className="text-xl font-semibold text-gray-800">Tallarines Verdes</h4>
-                <p className="mt-2 text-gray-600 text-sm leading-relaxed">Pasta en salsa de albahaca con bistec a la parrilla.</p>
-              </div>
-            </div>
+            <DishCard 
+              nombre="Lomo Saltado"
+              descripcion="Clásico plato peruano acompañado de papas fritas y arroz."
+              imagen="/imagenes/lomo-saltado.jpg"
+              variant="featured"
+            />
+            <DishCard 
+              nombre="Ají de Gallina"
+              descripcion="Pollo deshilachado en crema de ají amarillo y queso."
+              imagen="/imagenes/aji-gallina.jpg"
+              variant="featured"
+            />
+            <DishCard 
+              nombre="Tallarines Verdes"
+              descripcion="Pasta en salsa de albahaca con bistec a la parrilla."
+              imagen="/imagenes/tallarines-verdes.jpg"
+              variant="featured"
+            />
           </div> 
 
           <div className="mt-20 bg-gray-100 rounded-2xl p-8 border border-gray-200">
@@ -207,17 +107,14 @@ export default function Home() {
             <h3 className="text-3xl font-semibold text-gray-800 text-center mb-10">Platos de Carta</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {platosDeCarta.map((plato) => (
-                <div key={plato.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition flex flex-col">
-                  <h4 className="text-xl font-semibold text-red-800">{plato.nombre}</h4>
-                  <p className="text-gray-600 mt-3 text-sm leading-relaxed grow">{plato.desc}</p>
-                  <p className="mt-4 text-2xl font-bold text-gray-800">{plato.precio}</p>
-                  <button 
-                    onClick={() => navigate('/reservar')} 
-                    className="mt-5 w-full bg-red-800 hover:bg-red-900 text-white py-2 rounded-lg font-medium transition cursor-pointer"
-                  >
-                    Ordenar
-                  </button>
-                </div>
+                <DishCard 
+                  key={plato.id}
+                  nombre={plato.nombre}
+                  descripcion={plato.desc}
+                  precio={plato.precio}
+                  variant="menu"
+                  onAction={() => navigate('/reservar')}
+                />
               ))}
             </div>
           </div>

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header.jsx';
+import Input from '../components/Input.jsx';
+import Button from '../components/Button.jsx';
 
 const PLATOS_SELECCIONABLES = [
   { id: 1, nombre: 'Lomo Saltado', precio: 'S/ 20.00', desc: 'Trozos de carne salteados con cebolla, tomate, papas fritas y arroz.' },
@@ -8,7 +11,7 @@ const PLATOS_SELECCIONABLES = [
   { id: 4, nombre: 'Arroz Chaufa', precio: 'S/ 15.00', desc: 'Arroz salteado al estilo oriental con pollo, huevo y cebollita china.' },
   { id: 5, nombre: 'Pollo a la Brasa', precio: 'S/ 18.00', desc: 'Cuarto de pollo acompañado de papas fritas y ensalada fresca.' },
   { id: 6, nombre: 'Seco de Res', precio: 'S/ 19.00', desc: 'Carne cocida en salsa de culantro acompañada de arroz y frejoles.' },
-  { id: 7, nombre: 'Causa Limeña', precio: 'S/ 14.00', desc: 'Puré de papa amarilla relleno de pollo y mayonesa.' },
+  { id: 7, fontName: 'Causa Limeña', nombre: 'Causa Limeña', precio: 'S/ 14.00', desc: 'Puré de papa amarilla relleno de pollo y mayonesa.' },
   { id: 8, nombre: 'Milanesa con Arroz', precio: 'S/ 16.00', desc: 'Milanesa de pollo crocante acompañada de arroz y ensalada.' },
   { id: 9, nombre: 'Arroz con Pollo', precio: 'S/ 16.00', desc: 'Arroz verde preparado con culantro acompañado de presa de pollo.' },
   { id: 10, fontName: 'Papa a la Huancaína', nombre: 'Papa a la Huancaína', precio: 'S/ 14.00', desc: 'Papas cocidas cubiertas con una cremosa salsa de queso y ají amarillo.' },
@@ -21,7 +24,7 @@ const PLATOS_SELECCIONABLES = [
   { id: 17, nombre: 'Menú del Día (Chaufa de Pollo + Entrada + Bebida)', precio: 'S/ 12.00', tipo: 'Menú' }
 ];
 
-export default function reservar() {
+export default function Reservar() {
   const navigate = useNavigate();
   const [platoSeleccionado, setPlatoSeleccionado] = useState('');
   const [fecha, setFecha] = useState('');
@@ -43,14 +46,12 @@ export default function reservar() {
       return;
     }
 
-    // Buscamos el objeto del plato para mandar sus datos completos a Mis Reservas
     const datosPlato = PLATOS_SELECCIONABLES.find(p => String(p.id) === platoSeleccionado);
 
-    // Mandamos los datos de la reserva con un ID de transacción único para evitar duplicados
     navigate('/misreservas', {
       state: {
         reservaCompletada: true,
-        idTransaccion: `tx-${Date.now()}`, // <--- Identificador único temporal
+        idTransaccion: `tx-${Date.now()}`,
         nombrePlato: datosPlato?.nombre,
         precioPlato: datosPlato?.precio,
         fecha: fecha,
@@ -59,20 +60,20 @@ export default function reservar() {
     });
   };
 
+  const horaOptions = [
+    { value: '', label: 'Selecciona una hora...' },
+    { value: '12:00', label: '12:00 PM' },
+    { value: '12:30', label: '12:30 PM' },
+    { value: '13:00', label: '01:00 PM' },
+    { value: '13:30', label: '01:30 PM' },
+    { value: '14:00', label: '02:00 PM' }
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="bg-red-900 text-white">
-        <header className="w-full border-b border-red-700">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-semibold tracking-wide">Universidad del NOSE</h1>
-            <div>
-              <Link to="/" className="text-sm font-medium border border-white px-4 py-1.5 rounded-md hover:bg-white hover:text-red-900 transition">
-                ← Volver al Home
-              </Link>
-            </div>
-          </div>
-        </header>
+      <Header backLink="/" backText="← Volver al Home" variant="red" />
 
+      <div className="bg-red-900 text-white">
         <main className="flex flex-col items-center px-6 py-12 text-center">
           <h2 className="text-4xl font-light tracking-tight">Solicitar Nueva Reserva</h2>
           <p className="mt-2 text-sm text-red-200 uppercase tracking-wider font-semibold">
@@ -108,9 +109,11 @@ export default function reservar() {
                     />
                     <div>
                       <span className="font-medium text-gray-900 block">{plato.nombre}</span>
-                      <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider">
-                        {plato.tipo}
-                      </span>
+                      {plato.tipo && (
+                        <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider">
+                          {plato.tipo}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <span className="text-lg font-bold text-red-800">{plato.precio}</span>
@@ -127,46 +130,32 @@ export default function reservar() {
             </h3>
             
             <div className="space-y-4 grow">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">
-                  Fecha del Almuerzo
-                </label>
-                <input 
-                  type="date" 
-                  required
-                  value={fecha}
-                  onChange={(e) => setFecha(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 transition-all bg-gray-50"
-                />
-              </div>
+              <Input
+                label="Fecha del Almuerzo"
+                type="date"
+                required
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+              />
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">
-                  Hora de Recojo
-                </label>
-                <select 
-                  required
-                  value={hora}
-                  onChange={(e) => setHora(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 transition-all bg-gray-50"
-                >
-                  <option value="">Selecciona una hora...</option>
-                  <option value="12:00">12:00 PM</option>
-                  <option value="12:30">12:30 PM</option>
-                  <option value="13:00">01:00 PM</option>
-                  <option value="13:30">01:30 PM</option>
-                  <option value="14:00">02:00 PM</option>
-                </select>
-              </div>
+              <Input
+                label="Hora de Recojo"
+                type="select"
+                required
+                value={hora}
+                onChange={(e) => setHora(e.target.value)}
+                options={horaOptions}
+              />
             </div>
 
             <div className="mt-8 pt-4 border-t border-gray-100">
-              <button 
+              <Button 
                 type="submit"
-                className="w-full bg-red-800 hover:bg-red-900 text-white py-3 rounded-xl font-medium transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                variant="primary"
+                className="w-full flex items-center justify-center gap-2"
               >
                 Confirmar Reserva →
-              </button>
+              </Button>
               <p className="text-[11px] text-center text-gray-400 mt-3 leading-normal">
                 Al confirmar, se generará tu código de ticket correspondiente automáticamente.
               </p>

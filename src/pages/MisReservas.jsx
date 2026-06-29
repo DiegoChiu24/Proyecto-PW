@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Header from '../components/Header.jsx';
+import Button from '../components/Button.jsx';
 
 const RESERVAS_INICIALES = [
   {
@@ -28,16 +30,12 @@ export default function MisReservas() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Inicializar las reservas combinando lo guardado + la validación estricta de ID de transacción
   const [reservas, setReservas] = useState(() => {
     const guardadas = localStorage.getItem('mis_reservas_comedor');
     let listaActual = guardadas ? JSON.parse(guardadas) : RESERVAS_INICIALES;
 
-    // Si viene una nueva reserva desde el formulario
     if (location.state?.reservaCompletada && location.state?.idTransaccion) {
       const { nombrePlato, precioPlato, fecha, hora, idTransaccion } = location.state;
-      
-      // Verificamos si este ID de transacción EXACTO ya existe en el localStorage
       const transaccionDuplicada = listaActual.some(r => r.idTransaccion === idTransaccion);
 
       if (!transaccionDuplicada) {
@@ -49,7 +47,7 @@ export default function MisReservas() {
           hora: hora,
           estado: "Confirmada",
           tipoEstado: "success",
-          idTransaccion: idTransaccion // Guardamos el ID para recordarlo en el futuro
+          idTransaccion: idTransaccion
         };
 
         listaActual = [nuevaReserva, ...listaActual];
@@ -60,14 +58,12 @@ export default function MisReservas() {
     return listaActual;
   });
 
-  // Limpiar el estado de navegación inmediatamente al montar el componente
   useEffect(() => {
     if (location.state?.reservaCompletada) {
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location.state, navigate, location.pathname]);
 
-  // Función para cancelar
   const handleCancelar = (id) => {
     const listaActualizada = reservas.map(reserva => {
       if (reserva.id === id) {
@@ -81,24 +77,7 @@ export default function MisReservas() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 py-5 px-6 sm:px-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-red-900 tracking-tight">
-            Mis Reservas
-          </h1>
-          <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">
-            Universidad del NOSE — Panel de Alumno
-          </p>
-        </div>
-        <div>
-          <Link 
-            to="/" 
-            className="inline-flex items-center justify-center border-2 border-red-900 text-red-900 hover:bg-red-50 text-sm font-bold uppercase tracking-wider py-2 px-5 transition-colors duration-150"
-          >
-            ← Regresar al Sistema
-          </Link>
-        </div>
-      </div>
+      <Header backLink="/" backText="← Regresar al Sistema" variant="white" />
 
       <div className="flex flex-col">
         {reservas.map((reserva, index) => (
@@ -144,19 +123,21 @@ export default function MisReservas() {
             </div>
 
             <div className="flex items-center gap-2 border-t border-gray-100 pt-4 md:pt-0 md:border-0 justify-end">
-              <button 
+              <Button 
                 onClick={() => alert(`Ticket QR Código #00${reserva.id} listo para escaneo.`)}
-                className="bg-red-900 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider py-3 px-6 transition-colors duration-150"
+                variant="primary"
+                className="text-xs uppercase tracking-wider py-3 px-6 !rounded-none"
               >
                 Ver Ticket / QR
-              </button>
+              </Button>
               {reserva.estado !== "Cancelada" && (
-                <button 
+                <Button 
                   onClick={() => handleCancelar(reserva.id)}
-                  className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-red-600 py-3 px-4 transition-colors duration-150"
+                  variant="text"
+                  className="text-xs uppercase tracking-wider py-3 px-4"
                 >
                   Cancelar
-                </button>
+                </Button>
               )}
             </div>
           </div>

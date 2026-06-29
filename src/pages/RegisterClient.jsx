@@ -1,124 +1,82 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import AuthCard from '../components/AuthCard.jsx';
+import Input from '../components/Input.jsx';
+import Button from '../components/Button.jsx';
 
 export default function RegisterClient() {
   const navigate = useNavigate();
   const [nombres, setNombres] = useState('');
 
   const handleSubmit = (e) => {
-  e.preventDefault();
-  navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Cliente' } }); // <- Agregamos rol
-};
+    e.preventDefault();
+    navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Cliente' } });
+  };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
-        <div className="bg-[#801414] text-white p-6 text-center">
-          <h2 className="text-2xl font-bold tracking-tight">Universidad del NOSE</h2>
-          <p className="text-red-200 text-xs mt-1 uppercase tracking-wider font-semibold">
-            Registro - Cliente
-          </p>
-        </div>
-        <form className="p-8 space-y-4" onSubmit={handleSubmit}>
-          <div className="text-center mb-2">
-            <h3 className="text-xl font-bold text-slate-800">Formulario de Datos</h3>
-            <p className="text-slate-400 text-xs mt-1">Completa tus datos para crear una cuenta de cliente</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-                Nombres
-              </label>
-              <input 
-                type="text" 
-                placeholder="Juan" 
-                value={nombres}
-                onChange={(e) => setNombres(e.target.value)}
-                required 
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-                Apellidos
-              </label>
-              <input 
-                type="text" 
-                placeholder="Pérez" 
-                required 
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-              Código Universitario
-            </label>
-            <input 
-              type="text" 
-              placeholder="20261234" 
-              required 
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-              Correo Electrónico
-            </label>
-            <input 
-              type="email" 
-              placeholder="juan.perez@universidad.edu.pe" 
-              required 
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-              Contraseña
-            </label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
-              required 
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-              Confirmar Contraseña
-            </label>
-            <input 
-              type="password" 
-              placeholder="••••••••" 
-              required 
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
-            />
-          </div>
-
-          <div className="pt-2">
-            <button 
-              type="submit" 
-              className="w-full bg-[#bd0909] hover:bg-[#990707] text-white font-semibold py-2.5 px-5 rounded-lg shadow-md transition-all text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#bd0909]"
-            >
-              Registrar Cliente
-            </button>
-          </div>
-
-          <div className="text-center pt-4 border-t border-slate-100 flex justify-between items-center text-xs">
-            <Link to="/register" className="text-[#801414] hover:text-[#bd0909] font-medium transition-colors">
-              ← Volver a roles
-            </Link>
-            <Link to="/login" className="bg-[#1a2e40] hover:bg-[#111f2c] text-white px-3 py-1.5 rounded-lg font-medium shadow-sm transition-colors">
-              Iniciar Sesión
-            </Link>
-          </div>
-        </form>
+    <AuthCard
+      subtitle="Registro - Cliente"
+      title="Formulario de Datos"
+      innerSubtitle="Completa tus datos para crear una cuenta de cliente"
+      onSubmit={handleSubmit}
+      spacing="space-y-4"
+    >
+      <div className="grid grid-cols-2 gap-4">
+        <Input
+          label="Nombres"
+          placeholder="Juan"
+          value={nombres}
+          onChange={(e) => setNombres(e.target.value)}
+          required
+        />
+        <Input
+          label="Apellidos"
+          placeholder="Pérez"
+          required
+        />
       </div>
-    </div>
+
+      <Input
+        label="Código Universitario"
+        placeholder="20261234"
+        required
+      />
+
+      <Input
+        label="Correo Electrónico"
+        type="email"
+        placeholder="juan.perez@universidad.edu.pe"
+        required
+      />
+
+      <Input
+        label="Contraseña"
+        type="password"
+        placeholder="••••••••"
+        required
+      />
+
+      <Input
+        label="Confirmar Contraseña"
+        type="password"
+        placeholder="••••••••"
+        required
+      />
+
+      <div className="pt-2">
+        <Button type="submit" variant="primary" className="w-full">
+          Registrar Cliente
+        </Button>
+      </div>
+
+      <div className="text-center pt-4 border-t border-slate-100 flex justify-between items-center text-xs">
+        <Link to="/register" className="text-[#801414] hover:text-[#bd0909] font-medium transition-colors">
+          ← Volver a roles
+        </Link>
+        <Link to="/login" className="bg-[#1a2e40] hover:bg-[#111f2c] text-white px-3 py-1.5 rounded-lg font-medium shadow-sm transition-colors">
+          Iniciar Sesión
+        </Link>
+      </div>
+    </AuthCard>
   );
 }

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header.jsx';
+import Input from '../components/Input.jsx';
+import Button from '../components/Button.jsx';
 
 const STORAGE_KEY = 'mis_reservas_comedor';
 
-// Convierte "S/ 20.00" -> 20.00
 const parsePrecio = (precio) => {
   if (!precio) return 0;
   const limpio = String(precio).replace(/[^0-9.]/g, '');
@@ -13,7 +15,6 @@ const parsePrecio = (precio) => {
 export default function AdminReporte() {
   const navigate = useNavigate();
 
-  // Fecha de hoy en formato dd/mm/aaaa (igual al guardado en las reservas)
   const hoy = new Date();
   const fechaHoyIso = hoy.toISOString().split('T')[0];
 
@@ -33,7 +34,6 @@ export default function AdminReporte() {
 
   const fechaFiltroFormato = fechaFiltro.split('-').reverse().join('/');
 
-  // Reservas activas (no canceladas) de la fecha seleccionada
   const reservasDelDia = useMemo(
     () =>
       reservas.filter(
@@ -42,7 +42,6 @@ export default function AdminReporte() {
     [reservas, fechaFiltroFormato]
   );
 
-  // Agregado por plato
   const resumen = useMemo(() => {
     const mapa = new Map();
     reservasDelDia.forEach((r) => {
@@ -70,7 +69,7 @@ export default function AdminReporte() {
       .map((fila) => fila.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
       .join('\n');
 
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -83,20 +82,7 @@ export default function AdminReporte() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* HEADER */}
-      <div className="bg-red-900 text-white">
-        <header className="w-full border-b border-red-700">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-semibold tracking-wide">Universidad del NOSE</h1>
-            <Link
-              to="/perfil/admin"
-              className="text-sm font-medium border border-white px-4 py-1.5 rounded-md hover:bg-white hover:text-red-900 transition"
-            >
-              ← Volver al Panel
-            </Link>
-          </div>
-        </header>
-      </div>
+      <Header backLink="/perfil/admin" backText="← Volver al Panel" variant="red" />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-12 space-y-10">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -111,22 +97,20 @@ export default function AdminReporte() {
           </div>
           <div className="flex items-end gap-3">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-                Fecha del reporte
-              </label>
-              <input
+              <Input
+                label="Fecha del reporte"
                 type="date"
                 value={fechaFiltro}
                 onChange={(e) => setFechaFiltro(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 bg-white"
               />
             </div>
-            <button
+            <Button
               onClick={handleExportarCSV}
-              className="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded-xl transition-colors cursor-pointer whitespace-nowrap"
+              variant="navy"
+              className="text-xs uppercase tracking-wider py-2.5 px-5 rounded-xl whitespace-nowrap"
             >
               ↓ Exportar CSV
-            </button>
+            </Button>
           </div>
         </div>
 

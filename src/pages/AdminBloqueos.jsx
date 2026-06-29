@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header.jsx';
+import Input from '../components/Input.jsx';
+import Button from '../components/Button.jsx';
 
 const STORAGE_KEY = 'bloqueos_comedor';
 
@@ -86,20 +89,7 @@ export default function AdminBloqueos() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* HEADER */}
-      <div className="bg-red-900 text-white">
-        <header className="w-full border-b border-red-700">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-semibold tracking-wide">Universidad del NOSE</h1>
-            <Link
-              to="/perfil/admin"
-              className="text-sm font-medium border border-white px-4 py-1.5 rounded-md hover:bg-white hover:text-red-900 transition"
-            >
-              ← Volver al Panel
-            </Link>
-          </div>
-        </header>
-      </div>
+      <Header backLink="/perfil/admin" backText="← Volver al Panel" variant="red" />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-12 space-y-10">
         <div>
@@ -127,16 +117,16 @@ export default function AdminBloqueos() {
                 : 'El servicio está operativo. Los alumnos pueden reservar con normalidad.'}
             </p>
           </div>
-          <button
+          <Button
             onClick={toggleServicio}
-            className={`text-xs font-bold uppercase tracking-wider py-3 px-6 rounded-xl transition-colors cursor-pointer whitespace-nowrap ${
+            className={`text-xs uppercase tracking-wider py-3 px-6 rounded-xl whitespace-nowrap text-white ${
               data.servicioSuspendido
-                ? 'bg-green-600 hover:bg-green-700 text-white'
-                : 'bg-red-800 hover:bg-red-900 text-white'
+                ? 'bg-green-600 hover:bg-green-700'
+                : 'bg-red-800 hover:bg-red-900'
             }`}
           >
             {data.servicioSuspendido ? 'Reactivar Servicio' : 'Suspender Servicio'}
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -146,31 +136,26 @@ export default function AdminBloqueos() {
               Fechas Inhabilitadas
             </h3>
             <form onSubmit={handleAgregarFecha} className="space-y-3 mb-5">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Fecha</label>
-                <input
-                  type="date"
-                  value={fecha}
-                  onChange={(e) => setFecha(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 bg-gray-50"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Motivo</label>
-                <input
-                  type="text"
-                  value={motivoFecha}
-                  onChange={(e) => setMotivoFecha(e.target.value)}
-                  placeholder="Ej. Feriado nacional"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 bg-gray-50"
-                />
-              </div>
-              <button
+              <Input
+                label="Fecha"
+                type="date"
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+              />
+              <Input
+                label="Motivo"
+                type="text"
+                value={motivoFecha}
+                onChange={(e) => setMotivoFecha(e.target.value)}
+                placeholder="Ej. Feriado nacional"
+              />
+              <Button
                 type="submit"
-                className="w-full bg-red-50 hover:bg-red-100 text-red-900 text-xs font-bold uppercase tracking-wider py-2.5 border border-red-200 rounded-xl transition-colors cursor-pointer"
+                variant="danger"
+                className="w-full text-xs uppercase tracking-wider py-2.5 font-bold"
               >
                 Bloquear Fecha
-              </button>
+              </Button>
             </form>
 
             <ul className="space-y-2">
@@ -183,12 +168,13 @@ export default function AdminBloqueos() {
                     <span className="font-mono font-bold text-slate-800 text-sm">{formatearFecha(f.fecha)}</span>
                     <span className="block text-xs text-slate-500">{f.motivo}</span>
                   </div>
-                  <button
+                  <Button
                     onClick={() => handleEliminarFecha(f.id)}
-                    className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-red-600 cursor-pointer"
+                    variant="text"
+                    className="text-xs uppercase tracking-wider !py-1 !px-2"
                   >
                     Quitar
-                  </button>
+                  </Button>
                 </li>
               ))}
               {data.fechas.length === 0 && (
@@ -203,34 +189,27 @@ export default function AdminBloqueos() {
               Usuarios Bloqueados
             </h3>
             <form onSubmit={handleAgregarUsuario} className="space-y-3 mb-5">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-                  Nombre o Correo
-                </label>
-                <input
-                  type="text"
-                  value={usuario}
-                  onChange={(e) => setUsuario(e.target.value)}
-                  placeholder="Ej. juan.perez@uni.edu"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 bg-gray-50"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">Motivo</label>
-                <input
-                  type="text"
-                  value={motivoUsuario}
-                  onChange={(e) => setMotivoUsuario(e.target.value)}
-                  placeholder="Ej. Reservas no recogidas reiteradas"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 bg-gray-50"
-                />
-              </div>
-              <button
+              <Input
+                label="Nombre o Correo"
+                type="text"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+                placeholder="Ej. juan.perez@uni.edu"
+              />
+              <Input
+                label="Motivo"
+                type="text"
+                value={motivoUsuario}
+                onChange={(e) => setMotivoUsuario(e.target.value)}
+                placeholder="Ej. Reservas no recogidas reiteradas"
+              />
+              <Button
                 type="submit"
-                className="w-full bg-red-50 hover:bg-red-100 text-red-900 text-xs font-bold uppercase tracking-wider py-2.5 border border-red-200 rounded-xl transition-colors cursor-pointer"
+                variant="danger"
+                className="w-full text-xs uppercase tracking-wider py-2.5 font-bold"
               >
                 Bloquear Usuario
-              </button>
+              </Button>
             </form>
 
             <ul className="space-y-2">
@@ -243,12 +222,13 @@ export default function AdminBloqueos() {
                     <span className="font-bold text-slate-800 text-sm">{u.nombre}</span>
                     <span className="block text-xs text-slate-500">{u.motivo}</span>
                   </div>
-                  <button
+                  <Button
                     onClick={() => handleEliminarUsuario(u.id)}
-                    className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-green-600 cursor-pointer"
+                    variant="text"
+                    className="text-xs uppercase tracking-wider !py-1 !px-2 !text-green-700 hover:!text-green-950"
                   >
                     Desbloquear
-                  </button>
+                  </Button>
                 </li>
               ))}
               {data.usuarios.length === 0 && (

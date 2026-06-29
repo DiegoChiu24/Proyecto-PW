@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header.jsx';
+import Input from '../components/Input.jsx';
+import Button from '../components/Button.jsx';
 
-// Bloques por defecto (coinciden con los del formulario de reserva)
 const BLOQUES_INICIALES = [
   { id: 1, hora: '12:00', etiqueta: '12:00 PM', capacidad: 30, activo: true },
   { id: 2, hora: '12:30', etiqueta: '12:30 PM', capacidad: 30, activo: true },
@@ -23,7 +25,6 @@ export default function AdminHorarios() {
   const [hora, setHora] = useState('');
   const [capacidad, setCapacidad] = useState('30');
 
-  // Guard de sesión de administrador
   useEffect(() => {
     const sessionActive = localStorage.getItem('isLoggedIn') === 'true';
     if (!sessionActive) {
@@ -31,7 +32,6 @@ export default function AdminHorarios() {
     }
   }, [navigate]);
 
-  // Persistir cada cambio
   const persistir = (lista) => {
     setBloques(lista);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lista));
@@ -91,20 +91,7 @@ export default function AdminHorarios() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* HEADER */}
-      <div className="bg-red-900 text-white">
-        <header className="w-full border-b border-red-700">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 className="text-2xl font-semibold tracking-wide">Universidad del NOSE</h1>
-            <Link
-              to="/perfil/admin"
-              className="text-sm font-medium border border-white px-4 py-1.5 rounded-md hover:bg-white hover:text-red-900 transition"
-            >
-              ← Volver al Panel
-            </Link>
-          </div>
-        </header>
-      </div>
+      <Header backLink="/perfil/admin" backText="← Volver al Panel" variant="red" />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-12 space-y-10">
         <div>
@@ -124,34 +111,29 @@ export default function AdminHorarios() {
           className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-end gap-4"
         >
           <div className="flex-1">
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-              Nueva Hora de Recojo
-            </label>
-            <input
+            <Input
+              label="Nueva Hora de Recojo"
               type="time"
               value={hora}
               onChange={(e) => setHora(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 transition-all bg-gray-50"
             />
           </div>
           <div className="w-full sm:w-40">
-            <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-              Capacidad
-            </label>
-            <input
+            <Input
+              label="Capacidad"
               type="number"
               min="0"
               value={capacidad}
               onChange={(e) => setCapacidad(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none text-sm text-gray-800 focus:border-red-800 transition-all bg-gray-50"
             />
           </div>
-          <button
+          <Button
             type="submit"
-            className="bg-red-800 hover:bg-red-900 text-white py-2.5 px-6 rounded-xl font-medium transition shadow-md text-sm cursor-pointer whitespace-nowrap"
+            variant="primary"
+            className="w-full sm:w-auto whitespace-nowrap"
           >
             + Añadir Bloque
-          </button>
+          </Button>
         </form>
 
         {/* TABLA DE BLOQUES */}
@@ -193,18 +175,20 @@ export default function AdminHorarios() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 justify-end">
-                      <button
+                      <Button
                         onClick={() => handleToggle(b.id)}
-                        className="text-xs font-bold uppercase tracking-wider text-slate-600 hover:text-red-800 border border-slate-300 hover:border-red-300 rounded-md py-1.5 px-3 transition-colors cursor-pointer"
+                        variant="outline"
+                        className="text-xs py-1.5 px-3"
                       >
                         {b.activo ? 'Desactivar' : 'Activar'}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         onClick={() => handleEliminar(b.id)}
-                        className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-red-600 py-1.5 px-2 transition-colors cursor-pointer"
+                        variant="text"
+                        className="text-xs py-1.5 px-2"
                       >
                         Eliminar
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -221,12 +205,13 @@ export default function AdminHorarios() {
         </div>
 
         <div className="flex justify-end">
-          <button
+          <Button
             onClick={handleRestaurar}
-            className="text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-red-800 transition-colors cursor-pointer"
+            variant="text"
+            className="text-xs"
           >
             ↺ Restaurar bloques por defecto
-          </button>
+          </Button>
         </div>
       </main>
     </div>
