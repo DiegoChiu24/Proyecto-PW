@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { QRCodeSVG } from 'qrcode.react';
 import Header from '../components/Header.jsx';
 import Button from '../components/Button.jsx';
 
@@ -29,6 +30,7 @@ const RESERVAS_INICIALES = [
 export default function MisReservas() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [ticketQR, setTicketQR] = useState(null);
 
   const [reservas, setReservas] = useState(() => {
     const guardadas = localStorage.getItem('mis_reservas_comedor');
@@ -105,6 +107,7 @@ export default function MisReservas() {
                   <span className={`inline-block text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 border ${
                     reserva.tipoEstado === 'success' ? 'bg-green-50 text-green-700 border-green-200' :
                     reserva.tipoEstado === 'warning' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                    reserva.tipoEstado === 'info' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                     'bg-red-50 text-red-700 border-red-200'
                   }`}>
                     {reserva.estado}
@@ -123,14 +126,14 @@ export default function MisReservas() {
             </div>
 
             <div className="flex items-center gap-2 border-t border-gray-100 pt-4 md:pt-0 md:border-0 justify-end">
-              <Button 
-                onClick={() => alert(`Ticket QR Código #00${reserva.id} listo para escaneo.`)}
+              <Button
+                onClick={() => setTicketQR(reserva)}
                 variant="primary"
                 className="text-xs uppercase tracking-wider py-3 px-6 !rounded-none"
               >
                 Ver Ticket / QR
               </Button>
-              {reserva.estado !== "Cancelada" && (
+              {reserva.estado !== "Cancelada" && reserva.estado !== "Entregado" && (
                 <Button 
                   onClick={() => handleCancelar(reserva.id)}
                   variant="text"
@@ -152,6 +155,51 @@ export default function MisReservas() {
           </div>
         )}
       </div>
+
+      {ticketQR && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-50"
+          onClick={() => setTicketQR(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-8 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-xs font-mono font-bold text-gray-400 block">
+              CÓDIGO #00{ticketQR.id}
+            </span>
+            <h3 className="text-xl font-bold text-gray-900 mt-1">{ticketQR.plato}</h3>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {ticketQR.fecha} — {ticketQR.hora}
+            </p>
+
+            <div className="flex justify-center my-6">
+              <div className="p-4 border border-gray-200 rounded-xl">
+                <QRCodeSVG
+                  value={JSON.stringify({
+                    idTransaccion: ticketQR.idTransaccion,
+                    id: ticketQR.id
+                  })}
+                  size={200}
+                  level="M"
+                />
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Muestra este código QR al personal del comedor para validar la entrega de tu pedido.
+            </p>
+
+            <Button
+              onClick={() => setTicketQR(null)}
+              variant="outline"
+              className="w-full mt-6"
+            >
+              Cerrar
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

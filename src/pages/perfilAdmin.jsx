@@ -99,7 +99,7 @@ export default function PerfilAdmin() {
         <div className="border-t border-slate-200 pt-8">
           <h3 className="text-2xl font-bold text-slate-800 mb-6">Paneles de Control Avanzado</h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 bg-white border border-gray-300 divide-y md:divide-y-0 md:divide-x divide-gray-300 rounded-none shadow-none">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 bg-white border border-gray-300 divide-y lg:divide-y-0 lg:divide-x divide-gray-300 rounded-none shadow-none">
             
             <div className="p-6 flex flex-col justify-between min-h-[260px] rounded-none">
               <div>
@@ -158,6 +158,26 @@ export default function PerfilAdmin() {
                 className="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2 px-4 border border-slate-950 transition-colors rounded-none text-center block"
               >
                 Generar Reporte
+              </Link>
+            </div>
+
+            <div className="p-6 flex flex-col justify-between min-h-[260px] rounded-none">
+              <div>
+                <div className="inline-block text-[10px] font-bold tracking-wider text-red-900 bg-red-50 border border-red-200 px-2 py-0.5 mb-3 rounded-none">
+                  SECCIÓN 04
+                </div>
+                <h4 className="text-base font-bold text-slate-900 mb-2 rounded-none">
+                  Validar Entrega con QR
+                </h4>
+                <p className="text-slate-500 text-xs leading-relaxed">
+                  Escanea con la cámara el código QR del ticket del alumno para confirmar la entrega de su pedido en el comedor.
+                </p>
+              </div>
+              <Link
+                to="/admin/validar"
+                className="mt-6 w-full bg-red-800 hover:bg-red-900 text-white text-xs font-bold py-2 px-4 border border-red-950 transition-colors rounded-none text-center block"
+              >
+                Escanear QR
               </Link>
             </div>
 

@@ -11,6 +11,7 @@ import PerfilAdmin from './pages/perfilAdmin.jsx';
 import AdminHorarios from './pages/AdminHorarios.jsx';
 import AdminBloqueos from './pages/AdminBloqueos.jsx';
 import AdminReporte from './pages/AdminReporte.jsx';
+import AdminValidarReserva from './pages/AdminValidarReserva.jsx';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/admin/horarios" element={<AdminHorarios />} />
         <Route path="/admin/bloqueos" element={<AdminBloqueos />} />
         <Route path="/admin/reporte" element={<AdminReporte />} />
+        <Route path="/admin/validar" element={<AdminValidarReserva />} />
       </Routes>
     </Router>
   );
