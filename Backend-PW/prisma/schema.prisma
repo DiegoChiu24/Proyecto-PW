@@ -1,0 +1,91 @@
+// Schema Prisma - Sistema de Reservas del Comedor "Universidad del NOSE"
+// Provider: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  Cliente
+  Admin
+}
+
+enum EstadoReserva {
+  Confirmada
+  Pendiente
+  Cancelada
+}
+
+model Usuario {
+  id                  Int       @id @default(autoincrement())
+  nombres             String
+  apellidos           String
+  correo              String    @unique
+  password            String
+  codigoUniversitario String?
+  rol                 Rol       @default(Cliente)
+  bloqueado           Boolean   @default(false)
+  motivoBloqueo       String?
+  creadoEn            DateTime  @default(now())
+  reservas            Reserva[]
+}
+
+model Plato {
+  id          Int       @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  precio      Float
+  tipo        String?
+  imagen      String?
+  disponible  Boolean   @default(true)
+  creadoEn    DateTime  @default(now())
+  reservas    Reserva[]
+}
+
+model MenuDelDia {
+  id             Int    @id @default(autoincrement())
+  fecha          String @unique // formato "YYYY-MM-DD"
+  entrada        String
+  platoPrincipal String
+  bebida         String
+  precio         Float
+}
+
+model BloqueHorario {
+  id        Int     @id @default(autoincrement())
+  hora      String  @unique // ej. "12:00"
+  etiqueta  String // ej. "12:00 PM"
+  capacidad Int
+  activo    Boolean @default(true)
+}
+
+model Reserva {
+  id          Int           @id @default(autoincrement())
+  usuarioId   Int
+  usuario     Usuario       @relation(fields: [usuarioId], references: [id])
+  platoId     Int
+  plato       Plato         @relation(fields: [platoId], references: [id])
+  platoNombre String // snapshot del nombre al momento de reservar
+  precio      Float // snapshot del precio al momento de reservar
+  fecha       String // formato "YYYY-MM-DD"
+  hora        String // referencia al bloque horario, ej. "13:00"
+  estado      EstadoReserva @default(Confirmada)
+  codigo      String        @unique
+  creadoEn    DateTime      @default(now())
+}
+
+model FechaBloqueada {
+  id     Int    @id @default(autoincrement())
+  fecha  String @unique // formato "YYYY-MM-DD"
+  motivo String
+}
+
+model ConfiguracionServicio {
+  id                 Int     @id @default(1)
+  servicioSuspendido Boolean @default(false)
+}
