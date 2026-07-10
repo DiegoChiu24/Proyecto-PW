@@ -1,24 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-const platosDeCarta = [
-  { id: 1, nombre: 'Lomo Saltado', precio: 'S/ 20.00', desc: 'Trozos de carne salteados con cebolla, tomate, papas fritas y arroz.' },
-  { id: 2, nombre: 'Ají de Gallina', precio: 'S/ 15.00', desc: 'Pollo deshilachado en cremosa salsa de ají amarillo acompañado de arroz.' },
-  { id: 3, nombre: 'Tallarines Verdes', precio: 'S/ 16.00', desc: 'Pasta en salsa de albahaca servida con bisteck a la plancha.' },
-  { id: 4, nombre: 'Arroz Chaufa', precio: 'S/ 15.00', desc: 'Arroz salteado al estilo oriental con pollo, huevo y cebollita china.' },
-  { id: 5, nombre: 'Pollo a la Brasa', precio: 'S/ 18.00', desc: 'Cuarto de pollo acompañado de papas fritas y ensalada fresca.' },
-  { id: 6, nombre: 'Seco de Res', precio: 'S/ 19.00', desc: 'Carne cocida en salsa de culantro acompañada de arroz y frejoles.' },
-  { id: 7, nombre: 'Causa Limeña', precio: 'S/ 14.00', desc: 'Puré de papa amarilla relleno de pollo y mayonesa.' },
-  { id: 8, nombre: 'Milanesa con Arroz', precio: 'S/ 16.00', desc: 'Milanesa de pollo crocante acompañada de arroz y ensalada.' },
-  { id: 9, nombre: 'Arroz con Pollo', precio: 'S/ 16.00', desc: 'Arroz verde preparado con culantro acompañado de presa de pollo.' },
-  { id: 10, fontName: 'Papa a la Huancaína', nombre: 'Papa a la Huancaína', precio: 'S/ 14.00', desc: 'Papas cocidas cubiertas con una cremosa salsa de queso y ají amarillo.' },
-  { id: 11, nombre: 'Chanfainita', precio: 'S/ 15.00', desc: 'Tradicional guiso peruano acompañado de arroz blanco.' },
-  { id: 12, nombre: 'Pollo Broaster', precio: 'S/ 18.00', desc: 'Pollo empanizado y crocante acompañado de papas fritas.' },
-  { id: 13, nombre: 'Estofado de Pollo', precio: 'S/ 17.00', desc: 'Pollo cocido en salsa de tomate con zanahoria, arvejas y arroz.' },
-  { id: 14, fontName: 'Chicharrón de Cerdo', nombre: 'Chicharrón de Cerdo', precio: 'S/ 20.00', desc: 'Trozos de cerdo fritos servidos con camote y salsa criolla.' },
-  { id: 15, nombre: 'Tallarines Rojos', precio: 'S/ 15.00', desc: 'Pasta con salsa de tomate casera acompañada de pollo a la plancha.' },
-  { id: 16, fontName: 'Bistec a lo Pobre', nombre: 'Bisteck a lo Pobre', precio: 'S/ 19.00', desc: 'Bisteck acompañado de huevo frito, plátano frito y arroz.' },
-];
+const API_BASE = 'http://localhost:5000/api';
 
 export default function Home() {
   const location = useLocation();
@@ -41,6 +24,15 @@ export default function Home() {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('theme') === 'dark';
   });
+
+  // --- Estados para datos dinámicos del backend ---
+  const [platos, setPlatos] = useState([]);
+  const [platosLoading, setPlatosLoading] = useState(true);
+  const [platosError, setPlatosError] = useState('');
+
+  const [menuDia, setMenuDia] = useState(null);
+  const [menuLoading, setMenuLoading] = useState(true);
+  const [menuError, setMenuError] = useState('');
 
   useEffect(() => {
     const root = document.documentElement;
@@ -65,6 +57,50 @@ export default function Home() {
     }
   }, [location.state]);
 
+  // --- Fetch de platos disponibles ---
+  useEffect(() => {
+    const fetchPlatos = async () => {
+      setPlatosLoading(true);
+      setPlatosError('');
+      try {
+        const res = await fetch(`${API_BASE}/platos`);
+        if (!res.ok) throw new Error('Error al obtener los platos.');
+        const data = await res.json();
+        setPlatos(data);
+      } catch (err) {
+        setPlatosError(err.message || 'No se pudieron cargar los platos. Intenta más tarde.');
+      } finally {
+        setPlatosLoading(false);
+      }
+    };
+    fetchPlatos();
+  }, []);
+
+  // --- Fetch del menú del día ---
+  useEffect(() => {
+    const fetchMenuDia = async () => {
+      setMenuLoading(true);
+      setMenuError('');
+      try {
+        const res = await fetch(`${API_BASE}/menu-dia`);
+        if (res.status === 404) {
+          // No hay menú definido para hoy — no es un error crítico
+          setMenuDia(null);
+          setMenuError('');
+          return;
+        }
+        if (!res.ok) throw new Error('Error al obtener el menú del día.');
+        const data = await res.json();
+        setMenuDia(data);
+      } catch (err) {
+        setMenuError(err.message || 'No se pudo cargar el menú del día.');
+      } finally {
+        setMenuLoading(false);
+      }
+    };
+    fetchMenuDia();
+  }, []);
+
   const handleCerrarSesion = () => {
     setMenuAbierto(false);
     localStorage.clear(); 
@@ -73,6 +109,12 @@ export default function Home() {
     setRolUsuario('Alumno'); 
     navigate('/', { state: {} });
   };
+
+  // Selecciona los primeros 3 platos que tengan imagen para la sección de destacados
+  const platosDestacados = platos.filter((p) => p.imagen).slice(0, 3);
+
+  // Helper para formatear precio
+  const formatPrecio = (precio) => `S/ ${Number(precio).toFixed(2)}`;
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -177,79 +219,156 @@ export default function Home() {
 
       <section className="flex-1 w-full bg-white py-16 px-6">
         <div className="max-w-6xl mx-auto">
+
+          {/* ====== PLATOS DESTACADOS (dinámico) ====== */}
           <div className="mb-12 text-center">
             <h3 className="text-3xl font-semibold text-gray-800">Platos Destacados</h3>
             <p className="text-gray-500 mt-3">Opciones disponibles en el comedor universitario.</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition">
-              <div className="h-64 bg-gray-100 overflow-hidden">
-                <img src="/imagenes/lomo-saltado.jpg" alt="Lomo Saltado" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-5">
-                <h4 className="text-xl font-semibold text-gray-800">Lomo Saltado</h4>
-                <p className="mt-2 text-gray-600 text-sm leading-relaxed">Clásico plato peruano acompañado de papas fritas y arroz.</p>
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition">
-              <div className="h-64 bg-gray-100 overflow-hidden">
-                <img src="/imagenes/aji-gallina.jpg" alt="Ají de Gallina" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-5">
-                <h4 className="text-xl font-semibold text-gray-800">Ají de Gallina</h4>
-                <p className="mt-2 text-gray-600 text-sm leading-relaxed">Pollo deshilachado en crema de ají amarillo y queso.</p>
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition">
-              <div className="h-64 bg-gray-100 overflow-hidden">
-                <img src="/imagenes/tallarines-verdes.jpg" alt="Tallarines Verdes" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-5">
-                <h4 className="text-xl font-semibold text-gray-800">Tallarines Verdes</h4>
-                <p className="mt-2 text-gray-600 text-sm leading-relaxed">Pasta en salsa de albahaca con bisteck a la parrilla.</p>
-              </div>
-            </div>
-          </div> 
-
-          <div className="mt-20 bg-gray-100 rounded-2xl p-8 border border-gray-200">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Menú del Día</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div>
-                <h4 className="font-semibold text-red-800">Entrada</h4>
-                <p className="text-gray-600 mt-2">Ensalada fresca o sopa criolla.</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-red-800">Plato Principal</h4>
-                <p className="text-gray-600 mt-2">Arroz chaufa con pollo y papas doradas.</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-red-800">Bebida</h4>
-                <p className="text-gray-600 mt-2">Chicha morada o limonada.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-16">
-            <h3 className="text-3xl font-semibold text-gray-800 text-center mb-10">Platos de Carta</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {platosDeCarta.map((plato) => (
-                <div key={plato.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition flex flex-col">
-                  <h4 className="text-xl font-semibold text-red-800">{plato.nombre}</h4>
-                  <p className="text-gray-600 mt-3 text-sm leading-relaxed grow">{plato.desc}</p>
-                  <p className="mt-4 text-2xl font-bold text-gray-800">{plato.precio}</p>
-                  <button 
-                    onClick={() => navigate('/reservar')} 
-                    className="mt-5 w-full bg-red-800 hover:bg-red-900 text-white py-2 rounded-lg font-medium transition cursor-pointer"
-                  >
-                    Ordenar
-                  </button>
+          {platosLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden animate-pulse">
+                  <div className="h-64 bg-gray-200"></div>
+                  <div className="p-5 space-y-3">
+                    <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                  </div>
                 </div>
               ))}
             </div>
+          ) : platosError ? (
+            <div className="text-center py-12 bg-red-50 border border-red-200 rounded-2xl">
+              <svg className="w-12 h-12 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <p className="text-red-600 font-medium">{platosError}</p>
+              <p className="text-red-400 text-sm mt-1">Verifica que el servidor esté activo e intenta de nuevo.</p>
+            </div>
+          ) : platosDestacados.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {platosDestacados.map((plato) => (
+                <div key={plato.id} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition">
+                  <div className="h-64 bg-gray-100 overflow-hidden">
+                    <img 
+                      src={plato.imagen} 
+                      alt={plato.nombre} 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '';
+                        e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-sm">Sin imagen</div>';
+                      }}
+                    />
+                  </div>
+                  <div className="p-5">
+                    <h4 className="text-xl font-semibold text-gray-800">{plato.nombre}</h4>
+                    <p className="mt-2 text-gray-600 text-sm leading-relaxed">{plato.descripcion}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 border border-gray-200 rounded-2xl">
+              <p className="text-gray-500">No hay platos destacados disponibles en este momento.</p>
+            </div>
+          )}
+
+          {/* ====== MENÚ DEL DÍA (dinámico) ====== */}
+          <div className="mt-20 bg-gray-100 rounded-2xl p-8 border border-gray-200">
+            <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Menú del Día</h3>
+
+            {menuLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center animate-pulse">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-3 flex flex-col items-center">
+                    <div className="h-5 bg-gray-300 rounded w-24"></div>
+                    <div className="h-4 bg-gray-200 rounded w-48"></div>
+                  </div>
+                ))}
+              </div>
+            ) : menuError ? (
+              <div className="text-center py-6">
+                <p className="text-red-500 font-medium">{menuError}</p>
+                <p className="text-gray-400 text-sm mt-1">No se pudo conectar con el servidor.</p>
+              </div>
+            ) : menuDia ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                  <div>
+                    <h4 className="font-semibold text-red-800">Entrada</h4>
+                    <p className="text-gray-600 mt-2">{menuDia.entrada}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-red-800">Plato Principal</h4>
+                    <p className="text-gray-600 mt-2">{menuDia.platoPrincipal}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-red-800">Bebida</h4>
+                    <p className="text-gray-600 mt-2">{menuDia.bebida}</p>
+                  </div>
+                </div>
+                <p className="text-center mt-6 text-lg font-bold text-gray-800">
+                  Precio del menú: {formatPrecio(menuDia.precio)}
+                </p>
+              </>
+            ) : (
+              <div className="text-center py-6">
+                <p className="text-gray-500">No hay menú definido para el día de hoy.</p>
+                <p className="text-gray-400 text-sm mt-1">Vuelve a consultar más tarde.</p>
+              </div>
+            )}
           </div>
+
+          {/* ====== PLATOS DE CARTA (dinámico) ====== */}
+          <div className="mt-16">
+            <h3 className="text-3xl font-semibold text-gray-800 text-center mb-10">Platos de Carta</h3>
+
+            {platosLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div key={i} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm animate-pulse flex flex-col space-y-3">
+                    <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-7 bg-gray-200 rounded w-1/3 mt-2"></div>
+                    <div className="h-10 bg-gray-200 rounded w-full mt-3"></div>
+                  </div>
+                ))}
+              </div>
+            ) : platosError ? (
+              <div className="text-center py-12 bg-red-50 border border-red-200 rounded-2xl">
+                <svg className="w-12 h-12 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+                <p className="text-red-600 font-medium">{platosError}</p>
+                <p className="text-red-400 text-sm mt-1">Verifica que el servidor esté activo e intenta de nuevo.</p>
+              </div>
+            ) : platos.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {platos.map((plato) => (
+                  <div key={plato.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition flex flex-col">
+                    <h4 className="text-xl font-semibold text-red-800">{plato.nombre}</h4>
+                    <p className="text-gray-600 mt-3 text-sm leading-relaxed grow">{plato.descripcion}</p>
+                    <p className="mt-4 text-2xl font-bold text-gray-800">{formatPrecio(plato.precio)}</p>
+                    <button 
+                      onClick={() => navigate('/reservar')} 
+                      className="mt-5 w-full bg-red-800 hover:bg-red-900 text-white py-2 rounded-lg font-medium transition cursor-pointer"
+                    >
+                      Ordenar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 bg-gray-50 border border-gray-200 rounded-2xl">
+                <p className="text-gray-500">No hay platos de carta disponibles en este momento.</p>
+              </div>
+            )}
+          </div>
+
         </div>
       </section>
     </div>
