@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const API_URL = 'http://localhost:5000/api/auth';
 
@@ -8,15 +9,18 @@ export default function Login() {
   
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
     if (!correo || !password) {
-      setError('Por favor, completa todos los campos.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor, completa todos los campos.',
+        confirmButtonColor: '#801414',
+      });
       return;
     }
 
@@ -33,8 +37,34 @@ export default function Login() {
 
       if (!res.ok) {
         // El backend devuelve { error: "mensaje" } en caso de error
-        setError(data.error || 'Error al iniciar sesión.');
         setLoading(false);
+
+        // Diferenciar tipo de error por status code
+        if (res.status === 403) {
+          // Cuenta bloqueada
+          Swal.fire({
+            icon: 'error',
+            title: 'Cuenta bloqueada',
+            text: data.error || 'Tu cuenta ha sido bloqueada. Contacta al comedor.',
+            confirmButtonColor: '#801414',
+          });
+        } else if (res.status === 401) {
+          // Credenciales inválidas
+          Swal.fire({
+            icon: 'error',
+            title: 'Credenciales inválidas',
+            text: data.error || 'El correo o la contraseña son incorrectos.',
+            confirmButtonColor: '#801414',
+          });
+        } else {
+          // Otro error del servidor
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.error || 'Ocurrió un error al iniciar sesión.',
+            confirmButtonColor: '#801414',
+          });
+        }
         return;
       }
 
@@ -44,6 +74,17 @@ export default function Login() {
       localStorage.setItem('rolUsuario', data.rol);
       localStorage.setItem('userId', data.id);
       localStorage.setItem('usuario', JSON.stringify(data));
+
+      // Popup de éxito antes de redirigir
+      await Swal.fire({
+        icon: 'success',
+        title: `¡Bienvenido, ${data.nombres}!`,
+        text: 'Inicio de sesión exitoso. Serás redirigido.',
+        confirmButtonColor: '#801414',
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
 
       // Redirigir según el rol del usuario
       if (data.rol === 'Admin') {
@@ -57,7 +98,12 @@ export default function Login() {
       }
     } catch (err) {
       // Error de red (backend caído, sin conexión, etc.)
-      setError('No se pudo conectar con el servidor. Verifica que el backend esté activo.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Sin conexión',
+        text: 'No se pudo conectar con el servidor. Verifica que el backend esté activo.',
+        confirmButtonColor: '#801414',
+      });
     } finally {
       setLoading(false);
     }
@@ -79,16 +125,6 @@ export default function Login() {
             <p className="text-slate-400 text-xs mt-1">Ingresa tus credenciales</p>
           </div>
 
-          {/* Mensaje de error */}
-          {error && (
-            <div className="bg-red-50 border border-red-300 text-red-700 text-sm px-4 py-3 rounded-lg flex items-start gap-2">
-              <svg className="w-5 h-5 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <span>{error}</span>
-            </div>
-          )}
-
           <div>
             <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-2">
               Correo Electrónico
@@ -97,7 +133,7 @@ export default function Login() {
               type="email" 
               required
               value={correo}
-              onChange={(e) => { setCorreo(e.target.value); setError(''); }}
+              onChange={(e) => setCorreo(e.target.value)}
               placeholder="ejemplo@universidad.edu.pe" 
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
@@ -111,7 +147,7 @@ export default function Login() {
               type="password" 
               required
               value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(''); }}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••" 
               className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
