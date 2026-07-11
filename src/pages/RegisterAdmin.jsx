@@ -1,14 +1,56 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function RegisterAdmin() {
   const navigate = useNavigate();
   const [nombres, setNombres] = useState('');
+  const [apellidos, setApellidos] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [keyEncargado, setKeyEncargado] = useState('');
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
-  navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Admin' } });
-};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Error',
+        text: 'Las contraseñas no coinciden.',
+        confirmButtonColor: '#801414',
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/register/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombres, apellidos, correo, password, keyEncargado })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Error en el registro');
+
+      await Swal.fire({
+        icon: 'success',
+        title: '¡Registro Exitoso!',
+        text: data.mensaje || 'Tu cuenta ha sido creada correctamente.',
+        confirmButtonColor: '#801414',
+      });
+      
+      navigate('/login');
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de registro',
+        text: err.message,
+        confirmButtonColor: '#801414',
+      });
+    }
+  };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -46,6 +88,8 @@ export default function RegisterAdmin() {
               <input 
                 type="text" 
                 placeholder="Gómez" 
+                value={apellidos}
+                onChange={(e) => setApellidos(e.target.value)}
                 required 
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
               />
@@ -59,6 +103,8 @@ export default function RegisterAdmin() {
             <input 
               type="email" 
               placeholder="carlos.gomez@universidad.edu.pe" 
+              value={correo}
+              onChange={(e) => setCorreo(e.target.value)}
               required 
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
@@ -71,6 +117,8 @@ export default function RegisterAdmin() {
             <input 
               type="password" 
               placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required 
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
@@ -83,6 +131,8 @@ export default function RegisterAdmin() {
             <input 
               type="password" 
               placeholder="••••••••" 
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required 
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
@@ -93,8 +143,10 @@ export default function RegisterAdmin() {
               Key del Encargado (Validación)
             </label>
             <input 
-              type="text" 
+              type="password" 
               placeholder="Ingresa la clave de validación" 
+              value={keyEncargado}
+              onChange={(e) => setKeyEncargado(e.target.value)}
               required 
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />

@@ -1,14 +1,56 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function RegisterClient() {
   const navigate = useNavigate();
   const [nombres, setNombres] = useState('');
+  const [apellidos, setApellidos] = useState('');
+  const [codigoUniversitario, setCodigoUniversitario] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e) => {
-  e.preventDefault();
-    navigate('/', { state: { isLoggedIn: true, nombreUsuario: nombres, rol: 'Cliente' } });
-};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Error',
+        text: 'Las contraseñas no coinciden.',
+        confirmButtonColor: '#801414',
+      });
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/register/cliente', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombres, apellidos, codigoUniversitario, correo, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Error en el registro');
+
+      await Swal.fire({
+        icon: 'success',
+        title: '¡Registro Exitoso!',
+        text: data.mensaje || 'Tu cuenta ha sido creada correctamente.',
+        confirmButtonColor: '#801414',
+      });
+      
+      navigate('/login');
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de registro',
+        text: err.message,
+        confirmButtonColor: '#801414',
+      });
+    }
+  };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -46,6 +88,8 @@ export default function RegisterClient() {
               <input 
                 type="text" 
                 placeholder="Pérez" 
+                value={apellidos}
+                onChange={(e) => setApellidos(e.target.value)}
                 required 
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
               />
@@ -59,6 +103,8 @@ export default function RegisterClient() {
             <input 
               type="text" 
               placeholder="20261234" 
+              value={codigoUniversitario}
+              onChange={(e) => setCodigoUniversitario(e.target.value)}
               required 
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
@@ -71,6 +117,8 @@ export default function RegisterClient() {
             <input 
               type="email" 
               placeholder="juan.perez@universidad.edu.pe" 
+              value={correo}
+              onChange={(e) => setCorreo(e.target.value)}
               required 
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
@@ -83,6 +131,8 @@ export default function RegisterClient() {
             <input 
               type="password" 
               placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required 
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
@@ -95,6 +145,8 @@ export default function RegisterClient() {
             <input 
               type="password" 
               placeholder="••••••••" 
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required 
               className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#801414] focus:border-[#801414] outline-none text-sm text-slate-800 transition-all"
             />
@@ -103,7 +155,7 @@ export default function RegisterClient() {
           <div className="pt-2">
             <button 
               type="submit" 
-              className="w-full bg-[#bd0909] hover:bg-[#990707] text-white font-semibold py-2.5 px-5 rounded-lg shadow-md transition-all text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#bd0909]"
+              className="w-full bg-[#bd0909] hover:bg-[#990707] text-white font-semibold py-2.5 px-5 rounded-lg shadow-md transition-all text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#bd0909] cursor-pointer"
             >
               Registrar Cliente
             </button>

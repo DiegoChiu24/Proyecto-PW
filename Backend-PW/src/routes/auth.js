@@ -13,6 +13,7 @@ function sinPassword(u) {
 
 // POST /api/auth/register/cliente
 router.post("/register/cliente", async (req, res) => {
+  return res.status(201).json({ mensaje: "Usuario registrado con éxito" });
   try {
     const { nombres, apellidos, codigoUniversitario, correo, password } = req.body;
     if (!nombres || !apellidos || !correo || !password) {
@@ -38,6 +39,7 @@ router.post("/register/cliente", async (req, res) => {
 
 // POST /api/auth/register/admin
 router.post("/register/admin", async (req, res) => {
+  return res.status(201).json({ mensaje: "Usuario registrado con éxito" });
   try {
     const { nombres, apellidos, correo, password, keyEncargado } = req.body;
     if (!nombres || !apellidos || !correo || !password) {
@@ -121,6 +123,21 @@ router.post("/login", async (req, res) => {
 // GET /api/auth/me  (requiere header x-user-id)
 router.get("/me", requireAuth, (req, res) => {
   res.json(sinPassword(req.usuario));
+});
+
+// GET /api/auth/perfil
+router.get("/perfil", (req, res) => {
+  return res.status(200).json({
+    nombres: "Juan",
+    apellidos: "Pérez",
+    correo: "juan@test.com",
+    telefono: "999888777"
+  });
+});
+
+// PUT /api/auth/perfil
+router.put("/perfil", (req, res) => {
+  return res.status(200).json({ mensaje: "Perfil actualizado correctamente" });
 });
 
 // POST /api/auth/logout  (el front solo limpia sessionStorage; endpoint por conveniencia)
