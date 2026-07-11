@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+
+const API_URL = 'http://localhost:5000/api/reservas';
+
+function authHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'x-user-id': localStorage.getItem('userId') || '',
+  };
+}
 
 const PLATOS_SELECCIONABLES = [
   { id: 1, nombre: 'Lomo Saltado', precio: 'S/ 20.00', desc: 'Trozos de carne salteados con cebolla, tomate, papas fritas y arroz.' },
@@ -11,50 +21,85 @@ const PLATOS_SELECCIONABLES = [
   { id: 7, nombre: 'Causa Limeña', precio: 'S/ 14.00', desc: 'Puré de papa amarilla relleno de pollo y mayonesa.' },
   { id: 8, nombre: 'Milanesa con Arroz', precio: 'S/ 16.00', desc: 'Milanesa de pollo crocante acompañada de arroz y ensalada.' },
   { id: 9, nombre: 'Arroz con Pollo', precio: 'S/ 16.00', desc: 'Arroz verde preparado con culantro acompañado de presa de pollo.' },
-  { id: 10, fontName: 'Papa a la Huancaína', nombre: 'Papa a la Huancaína', precio: 'S/ 14.00', desc: 'Papas cocidas cubiertas con una cremosa salsa de queso y ají amarillo.' },
+  { id: 10, nombre: 'Papa a la Huancaína', precio: 'S/ 14.00', desc: 'Papas cocidas cubiertas con una cremosa salsa de queso y ají amarillo.' },
   { id: 11, nombre: 'Chanfainita', precio: 'S/ 15.00', desc: 'Tradicional guiso peruano acompañado de arroz blanco.' },
   { id: 12, nombre: 'Pollo Broaster', precio: 'S/ 18.00', desc: 'Pollo empanizado y crocante acompañado de papas fritas.' },
   { id: 13, nombre: 'Estofado de Pollo', precio: 'S/ 17.00', desc: 'Pollo cocido en salsa de tomate con zanahoria, arvejas y arroz.' },
-  { id: 14, fontName: 'Chicharrón de Cerdo', nombre: 'Chicharrón de Cerdo', precio: 'S/ 20.00', desc: 'Trozos de cerdo fritos servidos con camote y salsa criolla.' },
+  { id: 14, nombre: 'Chicharrón de Cerdo', precio: 'S/ 20.00', desc: 'Trozos de cerdo fritos servidos con camote y salsa criolla.' },
   { id: 15, nombre: 'Tallarines Rojos', precio: 'S/ 15.00', desc: 'Pasta con salsa de tomate casera acompañada de pollo a la plancha.' },
   { id: 16, nombre: 'Bistec a lo Pobre', precio: 'S/ 19.00', desc: 'Bistec acompañado de huevo frito, plátano maduro y arroz.' },
   { id: 17, nombre: 'Menú del Día (Chaufa de Pollo + Entrada + Bebida)', precio: 'S/ 12.00', tipo: 'Menú' }
 ];
 
-export default function reservar() {
+export default function Reservar() {
   const navigate = useNavigate();
   const [platoSeleccionado, setPlatoSeleccionado] = useState('');
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const sessionActive = localStorage.getItem('isLoggedIn') === 'true';
     if (!sessionActive) {
-      alert('Debes registrarte o iniciar sesión para poder realizar una reserva.');
-      navigate('/register');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Atención',
+        text: 'Debes registrarte o iniciar sesión para poder realizar una reserva.',
+        confirmButtonColor: '#801414',
+      }).then(() => {
+        navigate('/login');
+      });
     }
   }, [navigate]);
 
-  const handleProcederReserva = (e) => {
+  const handleProcederReserva = async (e) => {
     e.preventDefault();
     
     if (!platoSeleccionado || !fecha || !hora) {
-      alert('Por favor, completa todos los campos para tu reserva.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor, completa todos los campos para tu reserva.',
+        confirmButtonColor: '#801414',
+      });
       return;
     }
 
-    const datosPlato = PLATOS_SELECCIONABLES.find(p => String(p.id) === platoSeleccionado);
+    setSubmitting(true);
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ platoId: platoSeleccionado, fecha, hora })
+      });
+      const data = await res.json();
 
-    navigate('/misreservas', {
-      state: {
-        reservaCompletada: true,
-        idTransaccion: `tx-${Date.now()}`,
-        nombrePlato: datosPlato?.nombre,
-        precioPlato: datosPlato?.precio,
-        fecha: fecha,
-        hora: hora
+      if (!res.ok) {
+        throw new Error(data.error || 'No se pudo completar la reserva.');
       }
-    });
+
+      await Swal.fire({
+        icon: 'success',
+        title: '¡Reserva Exitosa!',
+        text: data.mensaje || 'Tu reserva fue registrada correctamente.',
+        confirmButtonColor: '#801414',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      // Redirigir a mis reservas
+      navigate('/misreservas');
+
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de reserva',
+        text: err.message,
+        confirmButtonColor: '#801414',
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -107,7 +152,7 @@ export default function reservar() {
                     <div>
                       <span className="font-medium text-gray-900 reserva-plato-nombre block">{plato.nombre}</span>
                       <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider reserva-plato-tipo">
-                        {plato.tipo}
+                        {plato.tipo || 'Carta'}
                       </span>
                     </div>
                   </div>
@@ -161,9 +206,10 @@ export default function reservar() {
             <div className="mt-8 pt-4 border-t border-gray-100">
               <button 
                 type="submit"
-                className="w-full bg-red-800 hover:bg-red-900 text-white py-3 rounded-xl font-medium transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                disabled={submitting}
+                className="w-full bg-red-800 hover:bg-red-900 disabled:bg-red-400 text-white py-3 rounded-xl font-medium transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
-                Confirmar Reserva →
+                {submitting ? 'Confirmando...' : 'Confirmar Reserva →'}
               </button>
               <p className="text-[11px] text-center text-gray-400 mt-3 leading-normal">
                 Al confirmar, se generará tu código de ticket correspondiente automáticamente.
