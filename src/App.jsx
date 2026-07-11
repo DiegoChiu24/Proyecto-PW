@@ -26,8 +26,11 @@ function App() {
         <Route path="/perfil" element={<PerfilCliente />} />
         <Route path="/perfil/admin" element={<PerfilAdmin />} />
         <Route path="/admin/horarios" element={<AdminHorarios />} />
+        <Route path="/AdminHorarios" element={<AdminHorarios />} />
         <Route path="/admin/bloqueos" element={<AdminBloqueos />} />
+        <Route path="/AdminBloqueos" element={<AdminBloqueos />} />
         <Route path="/admin/reporte" element={<AdminReporte />} />
+        <Route path="/AdminReporte" element={<AdminReporte />} />
       </Routes>
     </Router>
   );
