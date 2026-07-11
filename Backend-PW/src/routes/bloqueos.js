@@ -13,6 +13,10 @@ function sinPassword(u) {
 
 // GET /api/bloqueos/fechas  (admin)
 router.get("/fechas", requireAdmin, async (req, res) => {
+  return res.status(200).json([
+    { id: 1, fecha: "2024-12-25", motivo: "Navidad" },
+    { id: 2, fecha: "2024-07-28", motivo: "Fiestas Patrias" }
+  ]);
   try {
     const fechas = await prisma.fechaBloqueada.findMany({ orderBy: { fecha: "asc" } });
     res.json(fechas);
@@ -24,6 +28,7 @@ router.get("/fechas", requireAdmin, async (req, res) => {
 
 // POST /api/bloqueos/fechas  (admin)
 router.post("/fechas", requireAdmin, async (req, res) => {
+  return res.status(200).json({ mensaje: "Operación simulada con éxito", id: Date.now(), fecha: req.body.fecha, motivo: req.body.motivo });
   try {
     const { fecha, motivo } = req.body;
     if (!fecha) return res.status(400).json({ error: "La fecha es obligatoria." });
@@ -43,6 +48,7 @@ router.post("/fechas", requireAdmin, async (req, res) => {
 
 // DELETE /api/bloqueos/fechas/:id  (admin)
 router.delete("/fechas/:id", requireAdmin, async (req, res) => {
+  return res.status(200).json({ mensaje: "Operación simulada con éxito" });
   try {
     await prisma.fechaBloqueada.delete({ where: { id: Number(req.params.id) } });
     res.json({ mensaje: "Fecha desbloqueada." });
@@ -57,6 +63,10 @@ router.delete("/fechas/:id", requireAdmin, async (req, res) => {
 
 // GET /api/bloqueos/usuarios  (admin)
 router.get("/usuarios", requireAdmin, async (req, res) => {
+  return res.status(200).json([
+    { id: 1, nombres: "Juan", apellidos: "Pérez", correo: "juan@uni.edu", motivoBloqueo: "Inasistencias múltiples" },
+    { id: 2, nombres: "Ana", apellidos: "Gómez", correo: "ana@uni.edu", motivoBloqueo: "Falta de respeto al personal" }
+  ]);
   try {
     const usuarios = await prisma.usuario.findMany({ where: { bloqueado: true }, orderBy: { id: "asc" } });
     res.json(usuarios.map(sinPassword));
@@ -68,6 +78,7 @@ router.get("/usuarios", requireAdmin, async (req, res) => {
 
 // POST /api/bloqueos/usuarios  (admin)  -> body: { correo o usuarioId, motivo }
 router.post("/usuarios", requireAdmin, async (req, res) => {
+  return res.status(200).json({ mensaje: "Operación simulada con éxito", id: Date.now(), nombres: "Usuario Bloqueado", apellidos: "", correo: req.body.correo || "usuario@test", motivoBloqueo: req.body.motivo });
   try {
     const { correo, usuarioId, motivo } = req.body;
     if (!correo && !usuarioId) {
@@ -94,6 +105,7 @@ router.post("/usuarios", requireAdmin, async (req, res) => {
 
 // DELETE /api/bloqueos/usuarios/:id  (admin)  -> :id = id del usuario
 router.delete("/usuarios/:id", requireAdmin, async (req, res) => {
+  return res.status(200).json({ mensaje: "Operación simulada con éxito" });
   try {
     const actualizado = await prisma.usuario.update({
       where: { id: Number(req.params.id) },
