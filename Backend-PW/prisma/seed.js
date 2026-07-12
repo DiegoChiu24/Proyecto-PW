@@ -55,6 +55,20 @@ async function main() {
     });
   }
 
+  // Plato Menú del Día (ID 17)
+  await prisma.plato.upsert({
+    where: { id: 17 },
+    update: {},
+    create: {
+      id: 17,
+      nombre: "Menú del Día",
+      descripcion: "Entrada, plato principal y bebida del día.",
+      precio: 12.0,
+      tipo: "Menú",
+      disponible: true,
+    },
+  });
+
   // Bloques horarios
   for (const b of BLOQUES) {
     await prisma.bloqueHorario.upsert({
