@@ -1,52 +1,58 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { obtenerSesion, cerrarSesion } from '../api.js';
 
 export default function PerfilAdmin() {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return location.state?.isLoggedIn || localStorage.getItem('isLoggedIn') === 'true';
-  });
-
+  const [usuario, setUsuario] = useState(() => location.state?.usuario || obtenerSesion());
+  const [isLoggedIn, setIsLoggedIn] = useState(!!(location.state?.usuario || obtenerSesion()));
   const [nombreUsuario, setNombreUsuario] = useState(() => {
-    return location.state?.nombreUsuario || localStorage.getItem('nombreUsuario') || 'Usuario';
+    const sesion = location.state?.usuario || obtenerSesion();
+    return sesion ? `${sesion.nombres} ${sesion.apellidos}` : 'Usuario';
   });
-
   const [rolUsuario, setRolUsuario] = useState(() => {
-    return location.state?.rol || localStorage.getItem('rolUsuario') || 'Admin';
+    const sesion = location.state?.usuario || obtenerSesion();
+    return sesion?.rol || 'Admin';
   });
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    const sesion = obtenerSesion();
+    if (!sesion || sesion.rol !== 'Admin') {
       navigate('/login');
+      return;
     }
-  }, [isLoggedIn, navigate]);
+    setUsuario(sesion);
+    setIsLoggedIn(true);
+    setNombreUsuario(`${sesion.nombres} ${sesion.apellidos}`);
+    setRolUsuario(sesion.rol || 'Admin');
+  }, [navigate]);
 
   const handleCerrarSesion = () => {
     setMenuAbierto(false);
-    localStorage.clear();
+    cerrarSesion();
+    setUsuario(null);
     setIsLoggedIn(false);
     setNombreUsuario('Usuario');
-    setRolUsuario('Alumno');
+    setRolUsuario('Admin');
     navigate('/', { state: {} });
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      {/* HEADER INTEGRADO */}
       <div className="bg-red-900 text-white">
         <header className="w-full border-b border-red-700">
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-semibold tracking-wide">
               Universidad del NOSE
             </h1>
-            
+
             <div className="flex gap-4">
               {isLoggedIn ? (
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setMenuAbierto(!menuAbierto)}
                     className="flex items-center gap-3 bg-red-800 border border-red-700 px-4 py-1.5 rounded-md hover:bg-red-750 transition outline-none cursor-pointer select-none"
                   >
@@ -58,15 +64,15 @@ export default function PerfilAdmin() {
 
                   {menuAbierto && (
                     <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl py-1 z-50">
-                      <Link 
-                        to="/" 
+                      <Link
+                        to="/"
                         onClick={() => setMenuAbierto(false)}
                         className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 font-medium transition-colors"
                       >
                         Ir al Home
                       </Link>
                       <hr className="border-gray-150 my-1" />
-                      <button 
+                      <button
                         onClick={handleCerrarSesion}
                         className="block w-full text-left px-4 py-2.5 text-sm text-red-700 hover:bg-red-50 font-semibold transition-colors cursor-pointer"
                       >
@@ -90,10 +96,7 @@ export default function PerfilAdmin() {
         </header>
       </div>
 
-      {/* CUERPO PRINCIPAL */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-6 py-12 space-y-12">
-        
-        {/* SECCIÓN SUPERIOR: DATOS GENERALES */}
         <div>
           <h2 className="text-3xl font-bold text-red-900 mb-8">
             Bienvenido usuario {nombreUsuario}
@@ -104,7 +107,7 @@ export default function PerfilAdmin() {
               <h3 className="text-xl font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">
                 Información de tu Cuenta
               </h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Nombres Completos</p>
@@ -157,12 +160,10 @@ export default function PerfilAdmin() {
           </div>
         </div>
 
-        {/* SECCIÓN INFERIOR: TABLA CUADRADA EXCLUSIVA DE ADMIN */}
         <div className="border-t border-slate-200 pt-8">
           <h3 className="text-2xl font-bold text-slate-800 mb-6">Paneles de Control Avanzado</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 bg-white border border-gray-300 divide-y md:divide-y-0 md:divide-x divide-gray-300 rounded-none shadow-none">
-            
             <div className="p-6 flex flex-col justify-between min-h-[260px] rounded-none">
               <div>
                 <div className="inline-block text-[10px] font-bold tracking-wider text-red-900 bg-red-50 border border-red-200 px-2 py-0.5 mb-3 rounded-none">
@@ -222,10 +223,8 @@ export default function PerfilAdmin() {
                 Generar Reporte
               </Link>
             </div>
-
           </div>
         </div>
-
       </main>
     </div>
   );

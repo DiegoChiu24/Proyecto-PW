@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
-const STORAGE_KEY = 'mis_reservas_comedor';
+import apiFetch, { obtenerSesion } from '../api.js';
 
 const parsePrecio = (precio) => {
   if (!precio) return 0;
@@ -15,37 +14,46 @@ export default function AdminReporte() {
   const hoy = new Date();
   const fechaHoyIso = hoy.toISOString().split('T')[0];
 
-  const [reservas] = useState(() => {
-    const guardadas = localStorage.getItem(STORAGE_KEY);
-    return guardadas ? JSON.parse(guardadas) : [];
-  });
-
+  const [reservas, setReservas] = useState([]);
   const [fechaFiltro, setFechaFiltro] = useState(fechaHoyIso);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    const sessionActive = localStorage.getItem('isLoggedIn') === 'true';
-    if (!sessionActive) {
+    const usuario = obtenerSesion();
+    if (!usuario || usuario.rol !== 'Admin') {
       navigate('/login');
+      return;
     }
-  }, [navigate]);
+
+    async function cargarReservas() {
+      try {
+        const data = await apiFetch(`/reservas?fecha=${fechaFiltro}`);
+        setReservas(data);
+      } catch (err) {
+        console.error(err);
+        setReservas([]);
+      } finally {
+        setCargando(false);
+      }
+    }
+
+    cargarReservas();
+  }, [fechaFiltro, navigate]);
 
   const fechaFiltroFormato = fechaFiltro.split('-').reverse().join('/');
 
   const reservasDelDia = useMemo(
-    () =>
-      reservas.filter(
-        (r) => r.fecha === fechaFiltroFormato && r.estado !== 'Cancelada'
-      ),
-    [reservas, fechaFiltroFormato]
+    () => reservas.filter((r) => r.estado !== 'Cancelada'),
+    [reservas]
   );
 
   const resumen = useMemo(() => {
     const mapa = new Map();
     reservasDelDia.forEach((r) => {
-      const actual = mapa.get(r.plato) || { plato: r.plato, cantidad: 0, ingresos: 0 };
+      const actual = mapa.get(r.platoNombre) || { plato: r.platoNombre, cantidad: 0, ingresos: 0 };
       actual.cantidad += 1;
       actual.ingresos += parsePrecio(r.precio);
-      mapa.set(r.plato, actual);
+      mapa.set(r.platoNombre, actual);
     });
     return Array.from(mapa.values()).sort((a, b) => b.cantidad - a.cantidad);
   }, [reservasDelDia]);
@@ -66,7 +74,7 @@ export default function AdminReporte() {
       .map((fila) => fila.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
       .join('\n');
 
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -125,7 +133,6 @@ export default function AdminReporte() {
           </div>
         </div>
 
-        {/* TARJETAS RESUMEN */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Platos solicitados</p>
@@ -141,7 +148,6 @@ export default function AdminReporte() {
           </div>
         </div>
 
-        {/* TABLA DE DESGLOSE */}
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-100">
             <h3 className="text-lg font-bold text-slate-800">
@@ -157,20 +163,28 @@ export default function AdminReporte() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {resumen.map((r) => (
-                <tr key={r.plato}>
-                  <td className="px-6 py-4 font-medium text-slate-800">{r.plato}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-block min-w-[2rem] text-center font-bold text-red-900 bg-red-50 border border-red-200 rounded-md px-2.5 py-0.5">
-                      {r.cantidad}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right font-mono font-bold text-slate-700">
-                    S/ {r.ingresos.toFixed(2)}
+              {cargando ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-12 text-center text-slate-500 font-medium">
+                    Cargando reporte...
                   </td>
                 </tr>
-              ))}
-              {resumen.length === 0 && (
+              ) : (
+                resumen.map((r) => (
+                  <tr key={r.plato}>
+                    <td className="px-6 py-4 font-medium text-slate-800">{r.plato}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="inline-block min-w-[2rem] text-center font-bold text-red-900 bg-red-50 border border-red-200 rounded-md px-2.5 py-0.5">
+                        {r.cantidad}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right font-mono font-bold text-slate-700">
+                      S/ {r.ingresos.toFixed(2)}
+                    </td>
+                  </tr>
+                ))
+              )}
+              {!cargando && resumen.length === 0 && (
                 <tr>
                   <td colSpan={3} className="px-6 py-12 text-center text-slate-500 font-medium">
                     No hay reservas activas registradas para esta fecha.

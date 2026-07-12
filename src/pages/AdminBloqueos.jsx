@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-
-const STORAGE_KEY = 'bloqueos_comedor';
+import apiFetch, { obtenerSesion } from '../api.js';
 
 const ESTADO_INICIAL = {
   servicioSuspendido: false,
@@ -12,74 +11,107 @@ const ESTADO_INICIAL = {
 export default function AdminBloqueos() {
   const navigate = useNavigate();
 
-  const [data, setData] = useState(() => {
-    const guardado = localStorage.getItem(STORAGE_KEY);
-    return guardado ? { ...ESTADO_INICIAL, ...JSON.parse(guardado) } : ESTADO_INICIAL;
-  });
-
+  const [data, setData] = useState(ESTADO_INICIAL);
   const [fecha, setFecha] = useState('');
   const [motivoFecha, setMotivoFecha] = useState('');
   const [usuario, setUsuario] = useState('');
   const [motivoUsuario, setMotivoUsuario] = useState('');
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    const sessionActive = localStorage.getItem('isLoggedIn') === 'true';
-    if (!sessionActive) {
+    const usuarioSesion = obtenerSesion();
+    if (!usuarioSesion || usuarioSesion.rol !== 'Admin') {
       navigate('/login');
+      return;
     }
+
+    async function cargarDatos() {
+      try {
+        const [fechas, usuarios, servicio] = await Promise.all([
+          apiFetch('/bloqueos/fechas'),
+          apiFetch('/bloqueos/usuarios'),
+          apiFetch('/servicio/estado'),
+        ]);
+        setData({ servicioSuspendido: servicio.servicioSuspendido, fechas, usuarios });
+      } catch (err) {
+        console.error(err);
+        alert(err.message || 'No se pudieron cargar los bloqueos.');
+      } finally {
+        setCargando(false);
+      }
+    }
+
+    cargarDatos();
   }, [navigate]);
 
-  const persistir = (nuevo) => {
-    setData(nuevo);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nuevo));
+  const toggleServicio = async () => {
+    try {
+      const actualizado = await apiFetch('/servicio/estado', {
+        method: 'PATCH',
+        body: JSON.stringify({ servicioSuspendido: !data.servicioSuspendido }),
+      });
+      setData((prev) => ({ ...prev, servicioSuspendido: actualizado.servicioSuspendido }));
+    } catch (err) {
+      alert(err.message || 'No se pudo cambiar el estado del servicio.');
+    }
   };
 
-  const toggleServicio = () => {
-    persistir({ ...data, servicioSuspendido: !data.servicioSuspendido });
-  };
-
-  const handleAgregarFecha = (e) => {
+  const handleAgregarFecha = async (e) => {
     e.preventDefault();
     if (!fecha) {
       alert('Selecciona una fecha a bloquear.');
       return;
     }
-    if (data.fechas.some((f) => f.fecha === fecha)) {
-      alert('Esa fecha ya está bloqueada.');
-      return;
+
+    try {
+      const nueva = await apiFetch('/bloqueos/fechas', {
+        method: 'POST',
+        body: JSON.stringify({ fecha, motivo: motivoFecha.trim() || 'Día no laborable' }),
+      });
+      setData((prev) => ({ ...prev, fechas: [...prev.fechas, nueva].sort((a, b) => a.fecha.localeCompare(b.fecha)) }));
+      setFecha('');
+      setMotivoFecha('');
+    } catch (err) {
+      alert(err.message || 'No se pudo bloquear la fecha.');
     }
-    const nueva = {
-      id: Date.now(),
-      fecha,
-      motivo: motivoFecha.trim() || 'Día no laborable',
-    };
-    persistir({ ...data, fechas: [...data.fechas, nueva].sort((a, b) => a.fecha.localeCompare(b.fecha)) });
-    setFecha('');
-    setMotivoFecha('');
   };
 
-  const handleEliminarFecha = (id) => {
-    persistir({ ...data, fechas: data.fechas.filter((f) => f.id !== id) });
+  const handleEliminarFecha = async (id) => {
+    try {
+      await apiFetch(`/bloqueos/fechas/${id}`, { method: 'DELETE' });
+      setData((prev) => ({ ...prev, fechas: prev.fechas.filter((f) => f.id !== id) }));
+    } catch (err) {
+      alert(err.message || 'No se pudo desbloquear la fecha.');
+    }
   };
 
-  const handleAgregarUsuario = (e) => {
+  const handleAgregarUsuario = async (e) => {
     e.preventDefault();
     if (!usuario.trim()) {
-      alert('Indica el nombre o correo del usuario a bloquear.');
+      alert('Indica el correo o id del usuario a bloquear.');
       return;
     }
-    const nuevo = {
-      id: Date.now(),
-      nombre: usuario.trim(),
-      motivo: motivoUsuario.trim() || 'Incumplimiento de normas',
-    };
-    persistir({ ...data, usuarios: [...data.usuarios, nuevo] });
-    setUsuario('');
-    setMotivoUsuario('');
+
+    try {
+      const nuevo = await apiFetch('/bloqueos/usuarios', {
+        method: 'POST',
+        body: JSON.stringify({ correo: usuario.trim(), motivo: motivoUsuario.trim() || 'Incumplimiento de normas' }),
+      });
+      setData((prev) => ({ ...prev, usuarios: [...prev.usuarios, nuevo] }));
+      setUsuario('');
+      setMotivoUsuario('');
+    } catch (err) {
+      alert(err.message || 'No se pudo bloquear el usuario.');
+    }
   };
 
-  const handleEliminarUsuario = (id) => {
-    persistir({ ...data, usuarios: data.usuarios.filter((u) => u.id !== id) });
+  const handleEliminarUsuario = async (id) => {
+    try {
+      await apiFetch(`/bloqueos/usuarios/${id}`, { method: 'DELETE' });
+      setData((prev) => ({ ...prev, usuarios: prev.usuarios.filter((u) => u.id !== id) }));
+    } catch (err) {
+      alert(err.message || 'No se pudo desbloquear el usuario.');
+    }
   };
 
   const formatearFecha = (f) => f.split('-').reverse().join('/');
@@ -138,7 +170,6 @@ export default function AdminBloqueos() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
           <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">
               Fechas Inhabilitadas
@@ -172,24 +203,28 @@ export default function AdminBloqueos() {
             </form>
 
             <ul className="space-y-2">
-              {data.fechas.map((f) => (
-                <li
-                  key={f.id}
-                  className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5"
-                >
-                  <div>
-                    <span className="font-mono font-bold text-slate-800 text-sm">{formatearFecha(f.fecha)}</span>
-                    <span className="block text-xs text-slate-500">{f.motivo}</span>
-                  </div>
-                  <button
-                    onClick={() => handleEliminarFecha(f.id)}
-                    className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-red-600 cursor-pointer"
+              {cargando ? (
+                <li className="text-center text-slate-400 text-sm py-4">Cargando fechas...</li>
+              ) : (
+                data.fechas.map((f) => (
+                  <li
+                    key={f.id}
+                    className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5"
                   >
-                    Quitar
-                  </button>
-                </li>
-              ))}
-              {data.fechas.length === 0 && (
+                    <div>
+                      <span className="font-mono font-bold text-slate-800 text-sm">{formatearFecha(f.fecha)}</span>
+                      <span className="block text-xs text-slate-500">{f.motivo}</span>
+                    </div>
+                    <button
+                      onClick={() => handleEliminarFecha(f.id)}
+                      className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-red-600 cursor-pointer"
+                    >
+                      Quitar
+                    </button>
+                  </li>
+                ))
+              )}
+              {!cargando && data.fechas.length === 0 && (
                 <li className="text-center text-slate-400 text-sm py-4">No hay fechas bloqueadas.</li>
               )}
             </ul>
@@ -202,7 +237,7 @@ export default function AdminBloqueos() {
             <form onSubmit={handleAgregarUsuario} className="space-y-3 mb-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wide text-slate-500 mb-1">
-                  Nombre o Correo
+                  Correo o ID
                 </label>
                 <input
                   type="text"
@@ -231,24 +266,28 @@ export default function AdminBloqueos() {
             </form>
 
             <ul className="space-y-2">
-              {data.usuarios.map((u) => (
-                <li
-                  key={u.id}
-                  className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5"
-                >
-                  <div>
-                    <span className="font-bold text-slate-800 text-sm">{u.nombre}</span>
-                    <span className="block text-xs text-slate-500">{u.motivo}</span>
-                  </div>
-                  <button
-                    onClick={() => handleEliminarUsuario(u.id)}
-                    className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-green-600 cursor-pointer"
+              {cargando ? (
+                <li className="text-center text-slate-400 text-sm py-4">Cargando usuarios...</li>
+              ) : (
+                data.usuarios.map((u) => (
+                  <li
+                    key={u.id}
+                    className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5"
                   >
-                    Desbloquear
-                  </button>
-                </li>
-              ))}
-              {data.usuarios.length === 0 && (
+                    <div>
+                      <span className="font-bold text-slate-800 text-sm">{u.nombres || u.correo || u.nombre}</span>
+                      <span className="block text-xs text-slate-500">{u.motivoBloqueo || u.motivo}</span>
+                    </div>
+                    <button
+                      onClick={() => handleEliminarUsuario(u.id)}
+                      className="text-xs font-bold uppercase tracking-wider text-gray-400 hover:text-green-600 cursor-pointer"
+                    >
+                      Desbloquear
+                    </button>
+                  </li>
+                ))
+              )}
+              {!cargando && data.usuarios.length === 0 && (
                 <li className="text-center text-slate-400 text-sm py-4">No hay usuarios bloqueados.</li>
               )}
             </ul>

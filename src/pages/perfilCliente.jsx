@@ -1,32 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { obtenerSesion, cerrarSesion } from '../api.js';
 
 export default function PerfilCliente() {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return location.state?.isLoggedIn || localStorage.getItem('isLoggedIn') === 'true';
-  });
-
+  const [usuario, setUsuario] = useState(() => location.state?.usuario || obtenerSesion());
+  const [isLoggedIn, setIsLoggedIn] = useState(!!(location.state?.usuario || obtenerSesion()));
   const [nombreUsuario, setNombreUsuario] = useState(() => {
-    return location.state?.nombreUsuario || localStorage.getItem('nombreUsuario') || 'Usuario';
+    const sesion = location.state?.usuario || obtenerSesion();
+    return sesion ? `${sesion.nombres} ${sesion.apellidos}` : 'Usuario';
   });
-
   const [rolUsuario, setRolUsuario] = useState(() => {
-    return location.state?.rol || localStorage.getItem('rolUsuario') || 'Alumno';
+    const sesion = location.state?.usuario || obtenerSesion();
+    return sesion?.rol || 'Alumno';
   });
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    const sesion = obtenerSesion();
+    if (!sesion) {
       navigate('/login');
+      return;
     }
-  }, [isLoggedIn, navigate]);
+    setUsuario(sesion);
+    setIsLoggedIn(true);
+    setNombreUsuario(`${sesion.nombres} ${sesion.apellidos}`);
+    setRolUsuario(sesion.rol || 'Alumno');
+  }, [navigate]);
 
   const handleCerrarSesion = () => {
     setMenuAbierto(false);
-    localStorage.clear();
+    cerrarSesion();
+    setUsuario(null);
     setIsLoggedIn(false);
     setNombreUsuario('Usuario');
     setRolUsuario('Alumno');
@@ -42,7 +49,7 @@ export default function PerfilCliente() {
             <div className="flex gap-4">
               {isLoggedIn ? (
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setMenuAbierto(!menuAbierto)}
                     className="flex items-center gap-3 bg-red-800 border border-red-700 px-4 py-1.5 rounded-md hover:bg-red-750 transition cursor-pointer select-none"
                   >

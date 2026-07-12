@@ -1,46 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-
-const platosDeCarta = [
-  { id: 1, nombre: 'Lomo Saltado', precio: 'S/ 20.00', desc: 'Trozos de carne salteados con cebolla, tomate, papas fritas y arroz.' },
-  { id: 2, nombre: 'Ají de Gallina', precio: 'S/ 15.00', desc: 'Pollo deshilachado en cremosa salsa de ají amarillo acompañado de arroz.' },
-  { id: 3, nombre: 'Tallarines Verdes', precio: 'S/ 16.00', desc: 'Pasta en salsa de albahaca servida con bisteck a la plancha.' },
-  { id: 4, nombre: 'Arroz Chaufa', precio: 'S/ 15.00', desc: 'Arroz salteado al estilo oriental con pollo, huevo y cebollita china.' },
-  { id: 5, nombre: 'Pollo a la Brasa', precio: 'S/ 18.00', desc: 'Cuarto de pollo acompañado de papas fritas y ensalada fresca.' },
-  { id: 6, nombre: 'Seco de Res', precio: 'S/ 19.00', desc: 'Carne cocida en salsa de culantro acompañada de arroz y frejoles.' },
-  { id: 7, nombre: 'Causa Limeña', precio: 'S/ 14.00', desc: 'Puré de papa amarilla relleno de pollo y mayonesa.' },
-  { id: 8, nombre: 'Milanesa con Arroz', precio: 'S/ 16.00', desc: 'Milanesa de pollo crocante acompañada de arroz y ensalada.' },
-  { id: 9, nombre: 'Arroz con Pollo', precio: 'S/ 16.00', desc: 'Arroz verde preparado con culantro acompañado de presa de pollo.' },
-  { id: 10, fontName: 'Papa a la Huancaína', nombre: 'Papa a la Huancaína', precio: 'S/ 14.00', desc: 'Papas cocidas cubiertas con una cremosa salsa de queso y ají amarillo.' },
-  { id: 11, nombre: 'Chanfainita', precio: 'S/ 15.00', desc: 'Tradicional guiso peruano acompañado de arroz blanco.' },
-  { id: 12, nombre: 'Pollo Broaster', precio: 'S/ 18.00', desc: 'Pollo empanizado y crocante acompañado de papas fritas.' },
-  { id: 13, nombre: 'Estofado de Pollo', precio: 'S/ 17.00', desc: 'Pollo cocido en salsa de tomate con zanahoria, arvejas y arroz.' },
-  { id: 14, fontName: 'Chicharrón de Cerdo', nombre: 'Chicharrón de Cerdo', precio: 'S/ 20.00', desc: 'Trozos de cerdo fritos servidos con camote y salsa criolla.' },
-  { id: 15, nombre: 'Tallarines Rojos', precio: 'S/ 15.00', desc: 'Pasta con salsa de tomate casera acompañada de pollo a la plancha.' },
-  { id: 16, fontName: 'Bistec a lo Pobre', nombre: 'Bisteck a lo Pobre', precio: 'S/ 19.00', desc: 'Bisteck acompañado de huevo frito, plátano frito y arroz.' },
-];
+import apiFetch, { obtenerSesion, cerrarSesion } from '../api.js';
 
 export default function Home() {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [platos, setPlatos] = useState([]);
+  const [menuDia, setMenuDia] = useState(null);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return location.state?.isLoggedIn || localStorage.getItem('isLoggedIn') === 'true';
-  });
-
-  const [nombreUsuario, setNombreUsuario] = useState(() => {
-    return location.state?.nombreUsuario || localStorage.getItem('nombreUsuario') || 'Usuario';
-  });
-
-  const [rolUsuario, setRolUsuario] = useState(() => {
-    return location.state?.rol || localStorage.getItem('rolUsuario') || 'Alumno';
+  const [usuario, setUsuario] = useState(() => {
+    return location.state?.usuario || obtenerSesion();
   });
 
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('theme') === 'dark';
   });
+
+  const isLoggedIn = !!usuario;
+  const nombreUsuario = usuario ? `${usuario.nombres} ${usuario.apellidos}` : 'Usuario';
+  const rolUsuario = usuario?.rol || 'Alumno';
 
   useEffect(() => {
     const root = document.documentElement;
@@ -54,23 +34,35 @@ export default function Home() {
   }, [darkMode]);
 
   useEffect(() => {
-    if (location.state?.isLoggedIn) {
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('nombreUsuario', location.state.nombreUsuario);
-      localStorage.setItem('rolUsuario', location.state.rol || 'Alumno');
-      
-      setIsLoggedIn(true);
-      setNombreUsuario(location.state.nombreUsuario);
-      setRolUsuario(location.state.rol || 'Alumno');
+    async function cargarDatos() {
+      try {
+        const platosObtenidos = await apiFetch('/platos');
+        setPlatos(platosObtenidos);
+      } catch (err) {
+        console.error("Error al cargar platos:", err);
+      }
+
+      try {
+        const hoyStr = new Date().toLocaleDateString('sv'); // formato YYYY-MM-DD
+        const menuObtenido = await apiFetch(`/menu-dia?fecha=${hoyStr}`);
+        setMenuDia(menuObtenido);
+      } catch (err) {
+        console.error("Error al cargar menú del día:", err);
+      }
+    }
+    cargarDatos();
+  }, []);
+
+  useEffect(() => {
+    if (location.state?.usuario) {
+      setUsuario(location.state.usuario);
     }
   }, [location.state]);
 
   const handleCerrarSesion = () => {
     setMenuAbierto(false);
-    localStorage.clear(); 
-    setIsLoggedIn(false);
-    setNombreUsuario('Usuario');
-    setRolUsuario('Alumno'); 
+    cerrarSesion();
+    setUsuario(null);
     navigate('/', { state: {} });
   };
 
@@ -214,32 +206,40 @@ export default function Home() {
             </div>
           </div> 
 
-          <div className="mt-20 bg-gray-100 rounded-2xl p-8 border border-gray-200">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">Menú del Día</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div>
-                <h4 className="font-semibold text-red-800">Entrada</h4>
-                <p className="text-gray-600 mt-2">Ensalada fresca o sopa criolla.</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-red-800">Plato Principal</h4>
-                <p className="text-gray-600 mt-2">Arroz chaufa con pollo y papas doradas.</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-red-800">Bebida</h4>
-                <p className="text-gray-600 mt-2">Chicha morada o limonada.</p>
+          {menuDia ? (
+            <div className="mt-20 bg-gray-100 rounded-2xl p-8 border border-gray-200">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2 text-center">Menú del Día</h3>
+              <p className="text-center text-sm font-bold text-red-800 mb-6">Precio: S/ {Number(menuDia.precio).toFixed(2)}</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div>
+                  <h4 className="font-semibold text-red-800">Entrada</h4>
+                  <p className="text-gray-600 mt-2">{menuDia.entrada}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-red-800">Plato Principal</h4>
+                  <p className="text-gray-600 mt-2">{menuDia.platoPrincipal}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-red-800">Bebida</h4>
+                  <p className="text-gray-600 mt-2">{menuDia.bebida}</p>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-20 bg-gray-100 rounded-2xl p-8 border border-gray-200 text-center">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">Menú del Día</h3>
+              <p className="text-gray-500 text-sm mt-3">No hay un menú del día registrado para hoy.</p>
+            </div>
+          )}
 
           <div className="mt-16">
             <h3 className="text-3xl font-semibold text-gray-800 text-center mb-10">Platos de Carta</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {platosDeCarta.map((plato) => (
+              {platos.map((plato) => (
                 <div key={plato.id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-lg transition flex flex-col">
                   <h4 className="text-xl font-semibold text-red-800">{plato.nombre}</h4>
-                  <p className="text-gray-600 mt-3 text-sm leading-relaxed grow">{plato.desc}</p>
-                  <p className="mt-4 text-2xl font-bold text-gray-800">{plato.precio}</p>
+                  <p className="text-gray-600 mt-3 text-sm leading-relaxed grow">{plato.descripcion}</p>
+                  <p className="mt-4 text-2xl font-bold text-gray-800">S/ {Number(plato.precio).toFixed(2)}</p>
                   <button 
                     onClick={() => navigate('/reservar')} 
                     className="mt-5 w-full bg-red-800 hover:bg-red-900 text-white py-2 rounded-lg font-medium transition cursor-pointer"
