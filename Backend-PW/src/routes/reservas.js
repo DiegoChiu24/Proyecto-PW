@@ -6,7 +6,6 @@ const router = Router();
 
 // POST /api/reservas  (cliente autenticado)
 router.post("/", requireAuth, async (req, res) => {
-  return res.status(201).json({ mensaje: "Reserva creada con éxito", id: 999 });
   try {
     const usuario = req.usuario;
     const { platoId, fecha, hora } = req.body;
@@ -15,36 +14,30 @@ router.post("/", requireAuth, async (req, res) => {
       return res.status(400).json({ error: "Plato, fecha y hora son obligatorios." });
     }
 
-    // 3. Usuario bloqueado
     if (usuario.bloqueado) {
       return res.status(403).json({ error: "Tu cuenta está bloqueada y no puede reservar." });
     }
 
-    // 1. Servicio suspendido
     const config = await prisma.configuracionServicio.findUnique({ where: { id: 1 } });
     if (config?.servicioSuspendido) {
       return res.status(409).json({ error: "El servicio está suspendido temporalmente." });
     }
 
-    // 2. Fecha bloqueada
     const fechaBloqueada = await prisma.fechaBloqueada.findUnique({ where: { fecha } });
     if (fechaBloqueada) {
       return res.status(409).json({ error: `Fecha no disponible: ${fechaBloqueada.motivo}.` });
     }
 
-    // 4. Bloque horario existe y está activo
     const bloque = await prisma.bloqueHorario.findUnique({ where: { hora } });
     if (!bloque || !bloque.activo) {
       return res.status(400).json({ error: "El horario seleccionado no está disponible." });
     }
 
-    // Plato válido
     const plato = await prisma.plato.findUnique({ where: { id: Number(platoId) } });
     if (!plato) {
       return res.status(400).json({ error: "El plato seleccionado no existe." });
     }
 
-    // 5. Capacidad del bloque para esa fecha
     const ocupadas = await prisma.reserva.count({
       where: { hora, fecha, estado: { not: "Cancelada" } },
     });
@@ -74,10 +67,6 @@ router.post("/", requireAuth, async (req, res) => {
 
 // GET /api/reservas/mias  (reservas del usuario autenticado)
 router.get("/mias", requireAuth, async (req, res) => {
-  return res.status(200).json([
-    { id: 1, platoNombre: "Lomo Saltado", precio: 20.00, fecha: "2026-06-02", hora: "13:15", estado: "Confirmada", codigo: "TX-12345" },
-    { id: 2, platoNombre: "Ají de Gallina", precio: 15.00, fecha: "2026-06-04", hora: "12:45", estado: "Pendiente", codigo: "TX-67890" }
-  ]);
   try {
     const reservas = await prisma.reserva.findMany({
       where: { usuarioId: req.usuario.id },
@@ -109,7 +98,6 @@ router.get("/:id", requireAuth, async (req, res) => {
     const reserva = await prisma.reserva.findUnique({ where: { id: Number(req.params.id) } });
     if (!reserva) return res.status(404).json({ error: "Reserva no encontrada." });
 
-    // Un cliente solo puede ver sus propias reservas; el admin puede ver todas.
     if (req.usuario.rol !== "Admin" && reserva.usuarioId !== req.usuario.id) {
       return res.status(403).json({ error: "No tienes acceso a esta reserva." });
     }
@@ -122,7 +110,6 @@ router.get("/:id", requireAuth, async (req, res) => {
 
 // PATCH /api/reservas/:id/cancelar
 router.patch("/:id/cancelar", requireAuth, async (req, res) => {
-  return res.status(200).json({ mensaje: "Reserva cancelada simulada" });
   try {
     const reserva = await prisma.reserva.findUnique({ where: { id: Number(req.params.id) } });
     if (!reserva) return res.status(404).json({ error: "Reserva no encontrada." });

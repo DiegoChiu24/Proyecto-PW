@@ -5,15 +5,12 @@ import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-// Devuelve el usuario sin el campo password.
 function sinPassword(u) {
   const { password, ...resto } = u;
   return resto;
 }
 
-// POST /api/auth/register/cliente
 router.post("/register/cliente", async (req, res) => {
-  return res.status(201).json({ mensaje: "Usuario registrado con éxito" });
   try {
     const { nombres, apellidos, codigoUniversitario, correo, password } = req.body;
     if (!nombres || !apellidos || !correo || !password) {
@@ -37,9 +34,7 @@ router.post("/register/cliente", async (req, res) => {
   }
 });
 
-// POST /api/auth/register/admin
 router.post("/register/admin", async (req, res) => {
-  return res.status(201).json({ mensaje: "Usuario registrado con éxito" });
   try {
     const { nombres, apellidos, correo, password, keyEncargado } = req.body;
     if (!nombres || !apellidos || !correo || !password) {
@@ -66,33 +61,7 @@ router.post("/register/admin", async (req, res) => {
   }
 });
 
-// POST /api/auth/login
 router.post("/login", async (req, res) => {
-  const { correo, password, contrasena } = req.body;
-  const pass = password || contrasena;
-
-  if (correo === "admin@bembos.com" && pass === "123") {
-    return res.status(200).json({
-      id: 999,
-      nombres: "Admin",
-      apellidos: "Bembos",
-      correo,
-      rol: "Admin",
-      token: "token_mock_admin"
-    });
-  } else if (correo === "cliente@test.com" && pass === "123") {
-    return res.status(200).json({
-      id: 1000,
-      nombres: "Cliente",
-      apellidos: "Test",
-      correo,
-      rol: "Cliente",
-      token: "token_mock_cliente"
-    });
-  } else {
-    return res.status(401).json({ mensaje: "Credenciales incorrectas", error: "Credenciales incorrectas" });
-  }
-
   try {
     const { correo, password } = req.body;
     if (!correo || !password) {
@@ -120,27 +89,23 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// GET /api/auth/me  (requiere header x-user-id)
 router.get("/me", requireAuth, (req, res) => {
   res.json(sinPassword(req.usuario));
 });
 
-// GET /api/auth/perfil
 router.get("/perfil", (req, res) => {
-  return res.status(200).json({
+  res.status(200).json({
     nombres: "Juan",
     apellidos: "Pérez",
     correo: "juan@test.com",
-    telefono: "999888777"
+    telefono: "999888777",
   });
 });
 
-// PUT /api/auth/perfil
 router.put("/perfil", (req, res) => {
-  return res.status(200).json({ mensaje: "Perfil actualizado correctamente" });
+  res.status(200).json({ mensaje: "Perfil actualizado correctamente" });
 });
 
-// POST /api/auth/logout  (el front solo limpia sessionStorage; endpoint por conveniencia)
 router.post("/logout", (req, res) => {
   res.json({ mensaje: "Sesión finalizada." });
 });
