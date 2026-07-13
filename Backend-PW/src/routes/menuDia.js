@@ -10,15 +10,6 @@ function hoyISO() {
 
 // GET /api/menu-dia?fecha=YYYY-MM-DD  (por defecto hoy)
 router.get("/", async (req, res) => {
-  return res.status(200).json({
-    id: 1,
-    fecha: req.query.fecha || hoyISO(),
-    entrada: "Sopa a la Minuta o Ensalada Fresca",
-    platoPrincipal: "Ají de Gallina con Arroz",
-    bebida: "Chicha Morada Helada",
-    precio: 12.50
-  });
-
   try {
     const fecha = req.query.fecha || hoyISO();
     const menu = await prisma.menuDelDia.findUnique({ where: { fecha } });
