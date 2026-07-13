@@ -93,21 +93,37 @@ router.get("/me", requireAuth, (req, res) => {
   res.json(sinPassword(req.usuario));
 });
 
-router.get("/perfil", (req, res) => {
-  res.status(200).json({
-    nombres: "Juan",
-    apellidos: "Pérez",
-    correo: "juan@test.com",
-    telefono: "999888777",
-  });
+router.get("/perfil", requireAuth, async (req, res) => {
+  try {
+    const usuario = await prisma.usuario.findUnique({ where: { id: req.usuario.id } });
+    if (!usuario) return res.status(404).json({ error: "Usuario no encontrado." });
+    res.json(sinPassword(usuario));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al obtener el perfil." });
+  }
 });
 
-router.put("/perfil", (req, res) => {
-  res.status(200).json({ mensaje: "Perfil actualizado correctamente" });
+router.put("/perfil", requireAuth, async (req, res) => {
+  try {
+    const { nombres, apellidos, codigoUniversitario } = req.body;
+    const actualizado = await prisma.usuario.update({
+      where: { id: req.usuario.id },
+      data: {
+        ...(nombres !== undefined && { nombres }),
+        ...(apellidos !== undefined && { apellidos }),
+        ...(codigoUniversitario !== undefined && { codigoUniversitario }),
+      },
+    });
+    res.json({ mensaje: "Perfil actualizado correctamente", usuario: sinPassword(actualizado) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error al actualizar el perfil." });
+  }
 });
 
 router.post("/logout", (req, res) => {
-  res.json({ mensaje: "Sesión finalizada." });
+  res.json({ mensaje: "Sesión finalizado." });
 });
 
 export default router;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { guardarSesion } from '../api.js';
 
 const API_URL = 'http://localhost:5000/api/auth';
 
@@ -68,12 +69,8 @@ export default function Login() {
         return;
       }
 
-      // Login exitoso — guardar datos de sesión en localStorage
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('nombreUsuario', data.nombres);
-      localStorage.setItem('rolUsuario', data.rol);
-      localStorage.setItem('userId', data.id);
-      localStorage.setItem('usuario', JSON.stringify(data));
+      // Login exitoso — guardar datos de sesión en ambos storages
+      guardarSesion(data);
 
       // Popup de éxito antes de redirigir
       await Swal.fire({

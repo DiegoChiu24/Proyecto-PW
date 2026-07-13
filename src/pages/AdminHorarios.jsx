@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { getAuthHeaders } from '../api.js';
 
 const API_URL = 'http://localhost:5000/api/horarios';
 
 // Helper: headers con autenticación admin (x-user-id)
 function authHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    'x-user-id': localStorage.getItem('userId') || '',
-  };
+  return getAuthHeaders();
 }
 
 export default function AdminHorarios() {
