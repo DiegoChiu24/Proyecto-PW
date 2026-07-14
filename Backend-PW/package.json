@@ -1,5 +1,6 @@
 {
   "name": "backend-pw",
+  "homepage": "https://DiegoChiu24.github.io/Proyecto-PW/",
   "version": "1.0.0",
   "description": "API de reservas del comedor - Universidad del NOSE",
   "main": "index.js",
