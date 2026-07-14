@@ -14,7 +14,7 @@ import AdminReporte from './pages/AdminReporte.jsx';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/Proyecto-PW">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
