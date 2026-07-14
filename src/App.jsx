@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import Login from './pages/login.jsx';
 import Register from './pages/Register.jsx'; 
@@ -14,7 +14,7 @@ import AdminReporte from './pages/AdminReporte.jsx';
 
 function App() {
   return (
-    <Router basename="/Proyecto-PW">
+    <Router>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
