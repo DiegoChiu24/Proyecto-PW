@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { getAuthHeaders } from '../api.js';
 
-const API_URL = 'http://localhost:5000/api/bloqueos';
+const API_URL = 'https://proyecto-pw-ziku.onrender.com/api/bloqueos';
 const STORAGE_KEY = 'bloqueos_servicio';
 
 function authHeaders() {

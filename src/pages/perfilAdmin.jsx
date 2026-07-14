@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { getAuthHeaders } from '../api.js';
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'https://proyecto-pw-ziku.onrender.com/api/auth';
 
 function authHeaders() {
   return getAuthHeaders();

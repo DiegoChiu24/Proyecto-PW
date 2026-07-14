@@ -25,7 +25,7 @@ export default function RegisterClient() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/register/cliente', {
+      const res = await fetch('https://proyecto-pw-ziku.onrender.com/api/auth/register/cliente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombres, apellidos, codigoUniversitario, correo, password })
