@@ -1,0 +1,69 @@
+erDiagram
+    USUARIO ||--o{ RESERVA : realiza
+    PLATO ||--o{ RESERVA : incluye
+    BLOQUE_HORARIO ||--o{ RESERVA : asigna_hora
+    
+    USUARIO {
+        int id PK
+        string nombres
+        string apellidos
+        string correo UK
+        string password
+        string codigoUniversitario
+        enum rol
+        boolean bloqueado
+        string motivoBloqueo
+        datetime creadoEn
+    }
+    
+    PLATO {
+        int id PK
+        string nombre
+        string descripcion
+        float precio
+        string tipo
+        string imagen
+        boolean disponible
+        datetime creadoEn
+    }
+    
+    RESERVA {
+        int id PK
+        int usuarioId FK
+        int platoId FK
+        string platoNombre
+        float precio
+        string fecha
+        string hora
+        enum estado
+        string codigo UK
+        datetime creadoEn
+    }
+    
+    MENU_DEL_DIA {
+        int id PK
+        string fecha UK
+        string entrada
+        string platoPrincipal
+        string bebida
+        float precio
+    }
+    
+    BLOQUE_HORARIO {
+        int id PK
+        string hora UK
+        string etiqueta
+        int capacidad
+        boolean activo
+    }
+    
+    FECHA_BLOQUEADA {
+        int id PK
+        string fecha UK
+        string motivo
+    }
+    
+    CONFIGURACION_SERVICIO {
+        int id PK "default=1"
+        boolean servicioSuspendido
+    }
