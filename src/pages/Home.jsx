@@ -1,6 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+// Importación de imágenes estáticas para que Vite las empaquete correctamente
+import logoImg from '../../public/imagenes/LogoNose.jpg';
+import fondoImg from '../../public/imagenes/fondo.jpg';
+import lomoSaltadoImg from '../../public/imagenes/lomo-saltado.jpg';
+import ajiGallinaImg from '../../public/imagenes/aji-gallina.jpg';
+import tallarinesVerdesImg from '../../public/imagenes/tallarines-verdes.jpg';
+
+// Mapa para vincular las rutas de la BD con las imágenes importadas
+const imageMap = {
+  '/imagenes/lomo-saltado.jpg': lomoSaltadoImg,
+  '/imagenes/aji-gallina.jpg': ajiGallinaImg,
+  '/imagenes/tallarines-verdes.jpg': tallarinesVerdesImg,
+};
+
 const API_BASE = 'https://proyecto-pw-ziku.onrender.com/api';
 
 export default function Home() {
@@ -123,7 +137,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <h1 className="text-2xl font-semibold tracking-wide flex items-center gap-3">
               <img 
-                src="/imagenes/LogoNose.jpg" 
+                src={logoImg} 
                 alt="Logo Universidad del NOSE" 
                 className="w-16 h-16 object-contain"
                 onError={(e) => { e.target.style.display = 'none'; }}
@@ -188,7 +202,7 @@ export default function Home() {
 
         <main
           className="relative flex flex-col items-center px-6 py-20 bg-cover bg-center"
-          style={{ backgroundImage: 'url("/imagenes/fondo.jpg")' }}
+          style={{ backgroundImage: `url(${fondoImg})` }}
         >
           <div className="absolute inset-0 bg-slate-950/50"></div>
           <section className="relative text-center max-w-3xl text-white">
@@ -253,7 +267,7 @@ export default function Home() {
                 <div key={plato.id} className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition">
                   <div className="h-64 bg-gray-100 overflow-hidden">
                     <img 
-                      src={plato.imagen} 
+                      src={imageMap[plato.imagen] || (import.meta.env.BASE_URL + (plato.imagen || '').replace(/^\//, ''))} 
                       alt={plato.nombre} 
                       className="w-full h-full object-cover"
                       onError={(e) => {
